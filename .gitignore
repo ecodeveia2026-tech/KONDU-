@@ -1,0 +1,32 @@
+# Dépendances et builds
+node_modules
+dist
+dist-ssr
+*.local
+
+# Variables d'environnement secrètes (INTERDITES DANS GIT)
+.env
+.env.local
+.env.production
+.env.development
+*.env
+service-role-key.json
+*.pem
+
+# Logs & temporaires
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Éditeurs
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
