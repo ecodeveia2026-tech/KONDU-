@@ -7,8 +7,7 @@ import type { UserRole, ServiceType } from '../lib/types';
 import {
   Compass, Mail, Lock, User, Phone, Car, Building2,
   AlertCircle, Loader2, ShieldCheck, CheckCircle2,
-  ArrowRight, Eye, EyeOff, Bike, Zap, Crown, Truck,
-  MapPin, Sparkles
+  ArrowRight, Eye, EyeOff, Zap, Sparkles, MapPin
 } from 'lucide-react';
 
 // Types de service avec labels et icônes
@@ -296,7 +295,6 @@ export const RegisterPage: React.FC = () => {
 
   // ─── Indicateur de progression (wizard) ─────────────────────────────────
   const needsStep2 = role === 'PROVIDER' || role === 'BUSINESS';
-  const totalSteps = needsStep2 ? 2 : 1;
 
   // ─── Composant champ de saisie ───────────────────────────────────────────
   const InputField = ({

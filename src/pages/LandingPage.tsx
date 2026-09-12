@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Compass, MapPin, ArrowRight, Phone, Star, Shield,
-  CheckCircle2, Car, Bike, Truck, Crown, Building2,
-  Menu, X, ChevronDown, Users, TrendingUp, Download,
-  Zap, Clock, MessageCircle
+  Compass, MapPin, ArrowRight, Star, Shield,
+  CheckCircle2, Car, ChevronDown, Download, Clock
 } from 'lucide-react';
 
 /* ─── TÉLÉPHONE MOCKUP avec Google Maps réel ─────────────────────────────── */
@@ -116,7 +114,6 @@ const PhoneMockup: React.FC = () => (
 /* ─── NAVBAR ──────────────────────────────────────────────────────────────── */
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
