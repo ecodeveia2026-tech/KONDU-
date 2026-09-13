@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { LiveMap } from '../../components/LiveMap';
 import { NotificationCenter } from '../../components/NotificationCenter';
 import { Navbar } from '../../components/Navbar';
+import { orderService } from '../../lib/services/orderService';
+import { storageService } from '../../lib/services/storageService';
 import type { Order, ProviderProfile, ServiceType } from '../../lib/types';
 import confetti from 'canvas-confetti';
 import { 
@@ -20,27 +22,32 @@ import {
   ShieldCheck, 
   History,
   RotateCw,
-  Loader2
+  Loader2,
+  Camera,
+  Heart
 } from 'lucide-react';
 
 export const ClientDashboard: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   // Coordonnées GPS réelles du client
-  const [clientLat, setClientLat] = useState<number>(6.3703);
-  const [clientLng, setClientLng] = useState<number>(2.3912);
+  const [clientLat, setClientLat] = useState<number>(6.1375); // Lomé par défaut
+  const [clientLng, setClientLng] = useState<number>(1.2123);
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [gpsLoading, setGpsLoading] = useState<boolean>(true);
 
   // Prestataires disponibles aux alentours
   const [nearbyProviders, setNearbyProviders] = useState<ProviderProfile[]>([]);
+  const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
 
   // Formulaire de commande
   const [serviceType, setServiceType] = useState<ServiceType>('moto');
-  const [pickupAddress, setPickupAddress] = useState('Position actuelle (GPS)');
+  const [pickupAddress, setPickupAddress] = useState('Position actuelle (GPS Lomé)');
   const [dropoffAddress, setDropoffAddress] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Commande active en cours
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
@@ -75,23 +82,60 @@ export const ClientDashboard: React.FC = () => {
     }
   }, []);
 
-  // Chargement des chauffeurs disponibles depuis Supabase
+  // Chargement des chauffeurs réellement proches avec calcul de distance et priorité VIP
   const loadNearbyProviders = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('provider_profiles')
-        .select('*, profile:profiles(*)')
-        .eq('is_online', true)
-        .eq('is_available', true)
-        .eq('subscription_status', 'active');
+      const providers = await orderService.getNearbyAvailableProviders(
+        serviceType,
+        clientLat,
+        clientLng,
+        20.0
+      );
 
-      if (!error && data) {
-        setNearbyProviders(data as ProviderProfile[]);
+      // Adaptation au format ProviderProfile pour la carte LiveMap
+      const mappedProviders: ProviderProfile[] = providers.map((p) => ({
+        id: p.user_id,
+        user_id: p.user_id,
+        service_type: p.service_type,
+        vehicle_brand: p.vehicle_brand,
+        vehicle_model: p.vehicle_model,
+        vehicle_plate: p.vehicle_plate,
+        is_online: true,
+        is_available: true,
+        current_lat: p.current_lat,
+        current_lng: p.current_lng,
+        subscription_status: 'active',
+        is_vip: p.is_vip,
+        rating_avg: p.rating_avg,
+        total_ratings: p.total_ratings,
+        wallet_balance: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        profile: {
+          id: p.user_id,
+          user_id: p.user_id,
+          email: '',
+          full_name: p.full_name,
+          phone: p.phone,
+          whatsapp: p.whatsapp,
+          role: 'PROVIDER',
+          avatar_url: p.avatar_url,
+          is_verified: true,
+          created_at: '',
+          updated_at: '',
+        },
+      }));
+
+      setNearbyProviders(mappedProviders);
+
+      if (user) {
+        const favs = await orderService.getFavorites(user.id);
+        setFavoriteProviderIds(favs);
       }
     } catch (err) {
-      console.error('Erreur chargement chauffeurs:', err);
+      console.error('Erreur chargement chauffeurs proches:', err);
     }
-  }, []);
+  }, [serviceType, clientLat, clientLng, user]);
 
   // Chargement de la commande active et de l'historique
   const loadOrders = useCallback(async () => {
@@ -245,25 +289,61 @@ export const ClientDashboard: React.FC = () => {
     }
   };
 
-  // Soumission de l'évaluation post-course
+  // Soumission de l'évaluation post-course avec validation
   const handleReviewSubmit = async () => {
     if (!activeOrder?.provider_id || !user) return;
     try {
-      await supabase.from('reviews').insert({
-        order_id: activeOrder.id,
-        client_id: user.id,
-        provider_id: activeOrder.provider_id,
-        rating: reviewRating,
-        comment: reviewComment.trim() || null,
-      });
+      const res = await orderService.submitReview(
+        activeOrder.id,
+        user.id,
+        activeOrder.provider_id,
+        reviewRating,
+        reviewComment
+      );
 
+      if (res.success) {
+        confetti({ particleCount: 60, spread: 60 });
+      }
       setShowReviewModal(false);
       setActiveOrder(null);
       await loadOrders();
-      alert('Merci pour votre évaluation !');
     } catch (err) {
       console.error('Erreur envoi avis:', err);
       setShowReviewModal(false);
+    }
+  };
+
+  // Upload de photo de profil Client
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setIsUploadingPhoto(true);
+
+    try {
+      const res = await storageService.uploadAvatar(user.id, file);
+      if (res.success) {
+        await refreshProfile();
+        confetti({ particleCount: 50, spread: 50 });
+      } else {
+        alert(res.error || 'Erreur lors du téléversement de la photo.');
+      }
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  // Ajout / Retrait des Chauffeurs Favoris
+  const handleToggleFavorite = async (providerId: string) => {
+    if (!user) return;
+    const isFav = favoriteProviderIds.includes(providerId);
+
+    if (isFav) {
+      await orderService.removeFavorite(user.id, providerId);
+      setFavoriteProviderIds((prev) => prev.filter((id) => id !== providerId));
+    } else {
+      await orderService.addFavorite(user.id, providerId);
+      setFavoriteProviderIds((prev) => [...prev, providerId]);
+      confetti({ particleCount: 40, spread: 40 });
     }
   };
 
@@ -275,19 +355,51 @@ export const ClientDashboard: React.FC = () => {
         
         {/* En-tête du Dashboard Client */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Espace Passager</span>
-              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                0% Commission
-              </span>
+          <div className="flex items-center gap-4">
+            {/* Avatar & Upload Photo Client */}
+            <div className="relative group">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/40 overflow-hidden flex items-center justify-center text-amber-400 font-black text-2xl shadow-lg shadow-amber-500/10">
+                {profile?.avatar_url || profile?.photo_url ? (
+                  <img
+                    src={profile.avatar_url || profile.photo_url || ''}
+                    alt={profile.full_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  profile?.full_name?.charAt(0) || 'P'
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingPhoto}
+                title="Modifier ma photo"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 shadow transition-transform group-hover:scale-110"
+              >
+                {isUploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
-              Bonjour, {profile?.full_name || 'Passager'} 👋
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              Commandez une course ou suivez votre chauffeur en direct
-            </p>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Espace Passager</span>
+                <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  0% Commission
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
+                Bonjour, {profile?.full_name || 'Passager'} 👋
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                Commandez une course ou suivez votre chauffeur en direct
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -346,8 +458,16 @@ export const ClientDashboard: React.FC = () => {
             {activeOrder.provider ? (
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center font-bold text-xl text-amber-400">
-                    {activeOrder.provider.profile?.full_name?.charAt(0) || 'C'}
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 overflow-hidden flex items-center justify-center font-bold text-xl text-amber-400 shadow">
+                    {activeOrder.provider.profile?.avatar_url ? (
+                      <img
+                        src={activeOrder.provider.profile.avatar_url}
+                        alt={activeOrder.provider.profile.full_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      activeOrder.provider.profile?.full_name?.charAt(0) || 'C'
+                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -369,7 +489,7 @@ export const ClientDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Boutons d'appel et WhatsApp directs */}
+                {/* Boutons d'appel, WhatsApp directs et favoris */}
                 <div className="flex items-center gap-2">
                   {activeOrder.provider.profile?.phone && (
                     <a
@@ -390,6 +510,19 @@ export const ClientDashboard: React.FC = () => {
                       <MessageSquare className="w-4 h-4" />
                       <span>WhatsApp</span>
                     </a>
+                  )}
+                  {activeOrder.provider?.user_id && (
+                    <button
+                      onClick={() => handleToggleFavorite(activeOrder.provider!.user_id)}
+                      title={favoriteProviderIds.includes(activeOrder.provider!.user_id) ? "Retirer des favoris" : "Ajouter aux favoris"}
+                      className={`p-2.5 rounded-xl border transition-colors ${
+                        favoriteProviderIds.includes(activeOrder.provider!.user_id)
+                          ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
+                          : "bg-slate-800 text-slate-400 hover:text-white border-slate-700"
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${favoriteProviderIds.includes(activeOrder.provider!.user_id) ? "fill-amber-400 text-amber-400" : ""}`} />
+                    </button>
                   )}
                 </div>
               </div>

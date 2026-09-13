@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -187,17 +187,27 @@
 /* ===================== GLASS / CARD ===================== */
 
 .glass-panel {
-  background: rgba(255,255,255,0.85);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.9);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .glass-panel-dark {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 /* ===================== BUTTONS ===================== */
@@ -227,6 +237,19 @@
   box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
 }
 
+.gold-gradient-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  color: #020617 !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gold-gradient-btn:hover {
+  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.45);
+}
+
 /* ===================== TICKER ===================== */
 
 .ticker-wrap {
@@ -241,10 +264,10 @@
 
 /* ===================== SCROLLBAR ===================== */
 
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0b1120; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
 
 /* GOLD GRADIENT TEXT (sections sombres) */
 .gold-text {

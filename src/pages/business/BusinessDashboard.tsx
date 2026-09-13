@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Navbar } from '../../components/Navbar';
 import { NotificationCenter } from '../../components/NotificationCenter';
+import { locationService } from '../../lib/services/locationService';
+import { storageService } from '../../lib/services/storageService';
 import type { Order } from '../../lib/types';
 import confetti from 'canvas-confetti';
 import { 
   PlusCircle, 
   FileText, 
   Send,
-  Loader2
+  Loader2,
+  Camera,
+  Building2
 } from 'lucide-react';
 
 export const BusinessDashboard: React.FC = () => {
-  const { user, profile, businessProfile } = useAuth();
+  const { user, profile, businessProfile, refreshProfile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [serviceType, setServiceType] = useState<'delivery' | 'moving' | 'taxi'>('delivery');
   const [pickupAddress, setPickupAddress] = useState('');
@@ -21,6 +25,8 @@ export const BusinessDashboard: React.FC = () => {
   const [cargoDetails, setCargoDetails] = useState('');
   const [estimatedBudget, setEstimatedBudget] = useState('5000');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadBusinessOrders = async () => {
     if (!user) return;
@@ -43,22 +49,55 @@ export const BusinessDashboard: React.FC = () => {
     loadBusinessOrders();
   }, [user]);
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setIsUploadingLogo(true);
+
+    try {
+      const res = await storageService.uploadAvatar(user.id, file);
+      if (res.success) {
+        await refreshProfile();
+        confetti({ particleCount: 40, spread: 50 });
+      } else {
+        alert(res.error || 'Erreur lors du téléversement du logo.');
+      }
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
   const handleCreateBusinessOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setIsSubmitting(true);
 
     try {
+      let lat = 6.1375; // Lomé, Togo par défaut
+      let lng = 1.2123;
+      try {
+        const pos = await locationService.getCurrentPosition();
+        lat = pos.latitude;
+        lng = pos.longitude;
+      } catch {
+        // Fallback sur le centre de Lomé
+      }
+
       const { error } = await supabase.from('orders').insert({
         client_id: user.id,
         service_type: serviceType,
         status: 'searching',
         pickup_address: pickupAddress.trim(),
-        pickup_lat: 6.3703,
-        pickup_lng: 2.3912,
+        pickup_latitude: lat,
+        pickup_longitude: lng,
+        pickup_lat: lat,
+        pickup_lng: lng,
+        destination_address: dropoffAddress.trim(),
+        destination_latitude: lat + 0.02,
+        destination_longitude: lng + 0.02,
         dropoff_address: dropoffAddress.trim(),
-        dropoff_lat: 6.3900,
-        dropoff_lng: 2.4100,
+        dropoff_lat: lat + 0.02,
+        dropoff_lng: lng + 0.02,
         estimated_price: parseFloat(estimatedBudget) || 5000,
         currency: 'XOF',
         notes: `[ENTREPRISE: ${businessProfile?.company_name || 'Pro'}] ` + cargoDetails.trim(),
@@ -88,19 +127,51 @@ export const BusinessDashboard: React.FC = () => {
         
         {/* En-tête Espace Business */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-400">KONDU BUSINESS</span>
-              <span className="bg-blue-500/20 text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/30">
-                Compte Entreprise
-              </span>
+          <div className="flex items-center gap-4">
+            {/* Logo de l'entreprise avec upload */}
+            <div className="relative group">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-600/10 border-2 border-sky-500/40 overflow-hidden flex items-center justify-center text-sky-400 font-black text-2xl shadow-lg shadow-sky-500/10">
+                {profile?.avatar_url || profile?.photo_url ? (
+                  <img
+                    src={profile.avatar_url || profile.photo_url || ''}
+                    alt="Logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Building2 className="w-8 h-8 text-sky-400" />
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingLogo}
+                title="Modifier le logo"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-sky-500 text-slate-950 hover:bg-sky-400 shadow transition-transform group-hover:scale-110"
+              >
+                {isUploadingLogo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleLogoUpload}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
-              {businessProfile?.company_name || profile?.full_name} 🏢
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              Gestion centralisée des déménagements, livraisons de marchandises et courses pour votre structure
-            </p>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">KONDU BUSINESS</span>
+                <span className="bg-blue-500/20 text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-500/30">
+                  Compte Entreprise
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
+                {businessProfile?.company_name || profile?.full_name} 🏢
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                Gestion centralisée des déménagements, livraisons de marchandises et courses pour votre structure
+              </p>
+            </div>
           </div>
 
           <NotificationCenter />

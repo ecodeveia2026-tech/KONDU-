@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Navbar } from '../../components/Navbar';
 import { NotificationCenter } from '../../components/NotificationCenter';
+import { locationService } from '../../lib/services/locationService';
+import { storageService } from '../../lib/services/storageService';
+import { paymentService } from '../../lib/services/paymentService';
 import type { Order, SubscriptionPlan } from '../../lib/types';
 import confetti from 'canvas-confetti';
 import { 
@@ -14,7 +17,8 @@ import {
   MessageSquare, 
   Clock, 
   Loader2, 
-  RotateCw
+  RotateCw,
+  Camera
 } from 'lucide-react';
 
 export const ProviderDashboard: React.FC = () => {
@@ -22,6 +26,10 @@ export const ProviderDashboard: React.FC = () => {
 
   // Statut ONLINE / OFFLINE et GPS
   const [isOnline, setIsOnline] = useState<boolean>(providerProfile?.is_online || false);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [lastGpsUpdate, setLastGpsUpdate] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Demandes de courses entrantes en attente
   const [availableOrders, setAvailableOrders] = useState<Order[]>([]);
@@ -33,49 +41,89 @@ export const ProviderDashboard: React.FC = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState<boolean>(false);
   const [isActivatingPlan, setIsActivatingPlan] = useState<string | null>(null);
 
-  // Bascule ONLINE / OFFLINE avec gestion du GPS
+  // Bascule ONLINE / OFFLINE avec gestion du GPS temps réel continu
   const handleToggleOnline = async () => {
     if (!user) return;
     const nextStatus = !isOnline;
 
     if (nextStatus) {
-      // Demande de géolocalisation
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
+      // 1. Vérification de l'abonnement
+      const isSubActive = providerProfile?.subscription_status === 'active';
+      if (!isSubActive) {
+        setShowSubscriptionModal(true);
+        alert('Veuillez activer votre forfait KONDU (à partir de 200 F CFA) pour passer EN LIGNE et recevoir les courses des passagers.');
+        return;
+      }
 
-            await supabase
-              .from('provider_profiles')
-              .update({
-                is_online: true,
-                current_lat: lat,
-                current_lng: lng,
-                location_updated_at: new Date().toISOString(),
-              })
-              .eq('user_id', user.id);
+      // 2. Démarrage du suivi GPS en continu
+      try {
+        const initialPos = await locationService.getCurrentPosition();
+        setGpsAccuracy(initialPos.accuracy);
+        setLastGpsUpdate(new Date().toLocaleTimeString());
 
-            setIsOnline(true);
-            await refreshProfile();
+        await supabase
+          .from('provider_profiles')
+          .update({
+            is_online: true,
+            is_available: true,
+            current_lat: initialPos.latitude,
+            current_lng: initialPos.longitude,
+            location_accuracy: initialPos.accuracy,
+            location_updated_at: initialPos.timestamp,
+          })
+          .eq('user_id', user.id);
+
+        setIsOnline(true);
+        await refreshProfile();
+
+        // Lancement du suivi continu
+        locationService.startProviderTracking(
+          user.id,
+          (pos) => {
+            setGpsAccuracy(pos.accuracy);
+            setLastGpsUpdate(new Date().toLocaleTimeString());
           },
           (err) => {
-            alert('Impossible d\'activer le mode EN LIGNE sans autorisation GPS.');
-            console.warn('GPS refusé:', err);
-          },
-          { enableHighAccuracy: true }
+            console.warn('[ProviderDashboard] Avertissement GPS:', err.message);
+          }
         );
+      } catch (err: any) {
+        alert(err.message || 'Impossible d\'activer le mode EN LIGNE sans autorisation GPS.');
       }
     } else {
-      await supabase
-        .from('provider_profiles')
-        .update({ is_online: false })
-        .eq('user_id', user.id);
-
+      // Arrêt du suivi GPS et passage Hors Ligne
+      await locationService.setProviderOffline(user.id);
       setIsOnline(false);
+      setGpsAccuracy(null);
       await refreshProfile();
     }
   };
+
+  // Upload de photo de profil vers Supabase Storage
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    setIsUploadingPhoto(true);
+
+    try {
+      const res = await storageService.uploadAvatar(user.id, file);
+      if (res.success) {
+        await refreshProfile();
+        confetti({ particleCount: 50, spread: 50 });
+      } else {
+        alert(res.error || 'Erreur lors du téléversement de la photo.');
+      }
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  // Arrêt du suivi au démontage
+  useEffect(() => {
+    return () => {
+      locationService.stopTracking();
+    };
+  }, []);
 
   // Chargement des forfaits disponibles
   const loadPlans = useCallback(async () => {
@@ -226,36 +274,17 @@ export const ProviderDashboard: React.FC = () => {
     setIsActivatingPlan(plan.id);
 
     try {
-      const now = new Date();
-      const expires = new Date();
-      expires.setDate(now.getDate() + plan.duration_days);
+      const paymentRef = 'PAY-TG-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      const res = await paymentService.activateSubscriptionDirectly(user.id, plan, paymentRef);
 
-      // Création de l'enregistrement d'abonnement
-      await supabase.from('subscriptions').insert({
-        user_id: user.id,
-        plan_id: plan.id,
-        status: 'active',
-        starts_at: now.toISOString(),
-        expires_at: expires.toISOString(),
-        amount_paid: plan.price_cfa,
-        currency: 'XOF',
-        payment_reference: 'PAY-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
-      });
-
-      // Mise à jour du profil prestataire
-      await supabase
-        .from('provider_profiles')
-        .update({
-          subscription_status: 'active',
-          is_vip: plan.is_vip,
-          vip_expires_at: plan.is_vip ? expires.toISOString() : null,
-        })
-        .eq('user_id', user.id);
-
-      await refreshProfile();
-      setShowSubscriptionModal(false);
-      confetti({ particleCount: 80, spread: 70 });
-      alert(`Votre forfait "${plan.name}" est désormais actif pour ${plan.duration_days} jours !`);
+      if (res.success) {
+        await refreshProfile();
+        setShowSubscriptionModal(false);
+        confetti({ particleCount: 80, spread: 70 });
+        alert(`Votre forfait "${plan.name}" (${plan.price_cfa} F CFA) est désormais actif pour ${plan.duration_days} jours !`);
+      } else {
+        alert('Erreur lors de l\'activation: ' + (res.error || 'Veuillez réessayer.'));
+      }
     } catch (err: any) {
       console.error('Erreur activation abonnement:', err);
       alert('Erreur: ' + err.message);
@@ -274,21 +303,58 @@ export const ProviderDashboard: React.FC = () => {
         
         {/* En-tête Dashboard Chauffeur Pro */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">KONDU PRO</span>
-              {providerProfile?.is_vip && (
-                <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                  <Crown className="w-3 h-3 text-amber-400" /> VIP DORÉ
-                </span>
+          <div className="flex items-center gap-4">
+            {/* Photo de profil & upload */}
+            <div className="relative group">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/40 overflow-hidden flex items-center justify-center text-amber-400 font-black text-2xl shadow-lg shadow-amber-500/10">
+                {profile?.avatar_url || profile?.photo_url ? (
+                  <img
+                    src={profile.avatar_url || profile.photo_url || ''}
+                    alt={profile.full_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  profile?.full_name?.charAt(0) || 'K'
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingPhoto}
+                title="Modifier ma photo"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 shadow transition-transform group-hover:scale-110"
+              >
+                {isUploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-400">KONDU PRO</span>
+                {providerProfile?.is_vip && (
+                  <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    <Crown className="w-3 h-3 text-amber-400" /> VIP DORÉ
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
+                {profile?.full_name || 'Chauffeur Partenaire'} 👋
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                Véhicule : <strong className="text-slate-200">{providerProfile?.vehicle_brand} {providerProfile?.vehicle_model}</strong> • Plaque : <strong className="text-amber-400">{providerProfile?.vehicle_plate}</strong>
+              </p>
+              {isOnline && gpsAccuracy && (
+                <p className="text-[11px] text-emerald-400 font-semibold mt-1 flex items-center gap-1">
+                  <Navigation className="w-3 h-3" /> GPS Actif (Précision ±{gpsAccuracy}m • {lastGpsUpdate})
+                </p>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
-              {profile?.full_name || 'Chauffeur Partenaire'} 👋
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              Véhicule : <strong className="text-slate-200">{providerProfile?.vehicle_brand} {providerProfile?.vehicle_model}</strong> • Plaque : <strong className="text-amber-400">{providerProfile?.vehicle_plate}</strong>
-            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -443,18 +509,18 @@ export const ProviderDashboard: React.FC = () => {
           </div>
 
           {!isOnline ? (
-            <div className="p-8 text-center text-slate-400 space-y-3">
-              <Power className="w-10 h-10 text-slate-600 mx-auto" />
-              <p className="text-sm font-semibold text-slate-300">Vous êtes actuellement Hors Ligne</p>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Passez en mode "EN LIGNE" pour partager votre géolocalisation et recevoir les courses disponibles autour de vous.
+            <div className="p-8 text-center text-slate-300 space-y-3 bg-slate-900/60 rounded-2xl border border-slate-800/80">
+              <Power className="w-12 h-12 text-slate-500 mx-auto" />
+              <p className="text-base font-bold text-slate-100">Vous êtes actuellement Hors Ligne</p>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-sm mx-auto leading-relaxed">
+                Passez en mode <span className="text-emerald-400 font-semibold">"EN LIGNE"</span> pour partager votre géolocalisation et recevoir les courses disponibles autour de vous.
               </p>
             </div>
           ) : availableOrders.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 space-y-2">
-              <Clock className="w-8 h-8 text-amber-400/60 mx-auto animate-pulse" />
-              <p className="text-sm text-slate-300 font-semibold">En attente de nouvelles demandes...</p>
-              <p className="text-xs text-slate-500">Les courses s'afficheront ici instantanément en temps réel.</p>
+            <div className="p-8 text-center text-slate-300 space-y-3 bg-slate-900/60 rounded-2xl border border-slate-800/80">
+              <Clock className="w-10 h-10 text-amber-400 mx-auto animate-pulse" />
+              <p className="text-base font-bold text-slate-100">En attente de nouvelles demandes...</p>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">Les courses de passagers s'afficheront ici instantanément en temps réel dès qu'une commande est passée.</p>
             </div>
           ) : (
             <div className="space-y-4">

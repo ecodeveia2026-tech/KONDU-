@@ -23,6 +23,7 @@ export interface Profile {
   whatsapp?: string | null;
   role: UserRole;
   avatar_url?: string | null;
+  photo_url?: string | null;
   is_verified: boolean;
   created_at: string;
   updated_at: string;

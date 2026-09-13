@@ -62,23 +62,23 @@ export const Navbar: React.FC = () => {
 
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/#services" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-colors">
+            <Link to="/#services" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors">
               Nos Services
             </Link>
-            <Link to="/#pro" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5">
+            <Link to="/#pro" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1.5">
               <Car className="w-4 h-4 text-amber-400" />
               Espace Chauffeur (0% Commission)
             </Link>
-            <Link to="/#business" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-blue-400" />
+            <Link to="/#business" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1.5">
+              <Building2 className="w-4 h-4 text-sky-400" />
               Entreprises
             </Link>
-            <Link to="/#vip" className="text-sm font-medium text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1">
-              <Crown className="w-4 h-4 text-amber-400 fill-amber-400/20" />
+            <Link to="/#vip" className="text-sm font-bold text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
+              <Crown className="w-4 h-4 text-amber-400 fill-amber-400/30" />
               KONDU VIP
             </Link>
-            <Link to="/support" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1">
-              <HelpCircle className="w-4 h-4 text-slate-400" />
+            <Link to="/support" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1">
+              <HelpCircle className="w-4 h-4 text-amber-400" />
               Support
             </Link>
           </nav>

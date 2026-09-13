@@ -65,7 +65,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(({
           if (onClearError) onClearError();
         }}
         placeholder={placeholder}
-        className={`w-full bg-slate-950 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all shadow-inner ${
+        className={`w-full bg-slate-950 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-3 text-sm text-white placeholder:text-slate-400 focus:outline-none transition-all shadow-inner ${
           error
             ? 'border-red-500/80 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
             : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
@@ -508,7 +508,7 @@ export const RegisterPage: React.FC = () => {
                         if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
                       }}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-400 focus:outline-none transition-all ${
                         fieldErrors.password
                           ? 'border-red-500/80 focus:border-red-400'
                           : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
@@ -566,7 +566,7 @@ export const RegisterPage: React.FC = () => {
                         if (fieldErrors.confirmPassword) setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
                       }}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-400 focus:outline-none transition-all ${
                         fieldErrors.confirmPassword
                           ? 'border-red-500/80 focus:border-red-400'
                           : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
@@ -656,7 +656,7 @@ export const RegisterPage: React.FC = () => {
                         if (fieldErrors.vehiclePlate) setFieldErrors((prev) => ({ ...prev, vehiclePlate: '' }));
                       }}
                       placeholder="TG 1234 AB"
-                      className={`w-full bg-slate-950 border rounded-xl px-3 py-3 text-sm text-white uppercase placeholder:text-slate-500 focus:outline-none transition-all ${
+                      className={`w-full bg-slate-950 border rounded-xl px-3 py-3 text-sm text-white uppercase placeholder:text-slate-400 focus:outline-none transition-all ${
                         fieldErrors.vehiclePlate
                           ? 'border-red-500/80 focus:border-red-400'
                           : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
