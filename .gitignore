@@ -32,5 +32,10 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+# Vercel & dossiers internes
 .vercel
 /KONDU/
+
+# Scripts de migration locaux contenant des tokens
+src/sql/*.ps1
+src/sql/test_*.mjs
