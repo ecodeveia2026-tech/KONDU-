@@ -48,7 +48,7 @@ export const ProviderDashboard: React.FC = () => {
 
     if (nextStatus) {
       // 1. Vérification de l'abonnement
-      const isSubActive = providerProfile?.subscription_status === 'active';
+      const isSubActive = providerProfile?.subscription_status?.toUpperCase() === 'ACTIVE';
       if (!isSubActive) {
         setShowSubscriptionModal(true);
         alert('Veuillez activer votre forfait KONDU (à partir de 200 F CFA) pour passer EN LIGNE et recevoir les courses des passagers.');
@@ -293,7 +293,7 @@ export const ProviderDashboard: React.FC = () => {
     }
   };
 
-  const isSubActive = providerProfile?.subscription_status === 'active';
+  const isSubActive = providerProfile?.subscription_status?.toUpperCase() === 'ACTIVE';
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">

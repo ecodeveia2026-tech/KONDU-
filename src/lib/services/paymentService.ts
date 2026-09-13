@@ -118,15 +118,29 @@ class PaymentService {
       }
 
       // 2. Mise à jour du statut dans provider_profiles
-      const { error: provErr } = await supabase
+      let { error: provErr } = await supabase
         .from('provider_profiles')
         .update({
-          subscription_status: 'active',
+          subscription_status: 'ACTIVE',
           is_vip: plan.is_vip,
           vip_expires_at: plan.is_vip ? expires.toISOString() : null,
           updated_at: now.toISOString(),
         })
         .eq('user_id', userId);
+
+      // Fallback si la colonne attend des minuscules
+      if (provErr && provErr.message.includes('subscription_status')) {
+        const retry = await supabase
+          .from('provider_profiles')
+          .update({
+            subscription_status: 'active' as any,
+            is_vip: plan.is_vip,
+            vip_expires_at: plan.is_vip ? expires.toISOString() : null,
+            updated_at: now.toISOString(),
+          })
+          .eq('user_id', userId);
+        provErr = retry.error;
+      }
 
       if (provErr) {
         return { success: false, error: provErr.message };

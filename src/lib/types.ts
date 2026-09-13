@@ -6,7 +6,9 @@ export type UserRole = 'CLIENT' | 'PROVIDER' | 'BUSINESS' | 'ADMIN';
 
 export type ServiceType = 'moto' | 'taxi' | 'tricycle' | 'vip' | 'moving' | 'delivery';
 
-export type SubscriptionStatus = 'pending' | 'active' | 'expired' | 'suspended' | 'cancelled';
+export type SubscriptionStatus = 
+  | 'pending' | 'active' | 'expired' | 'suspended' | 'cancelled'
+  | 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'FAILED';
 
 export type OrderStatus = 'created' | 'searching' | 'accepted' | 'arriving' | 'in_progress' | 'completed' | 'cancelled';
 

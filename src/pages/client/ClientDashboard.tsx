@@ -104,7 +104,7 @@ export const ClientDashboard: React.FC = () => {
         is_available: true,
         current_lat: p.current_lat,
         current_lng: p.current_lng,
-        subscription_status: 'active',
+        subscription_status: 'ACTIVE',
         is_vip: p.is_vip,
         rating_avg: p.rating_avg,
         total_ratings: p.total_ratings,
