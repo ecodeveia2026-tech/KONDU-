@@ -1,5 +1,6 @@
 {
-    "recommendations": [
-        "artin.browser-panel"
-    ]
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+    "artin.browser-panel"
+  ]
 }
