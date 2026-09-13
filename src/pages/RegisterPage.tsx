@@ -20,6 +20,72 @@ const SERVICE_OPTIONS: { value: ServiceType; label: string; icon: string }[] = [
   { value: 'delivery', label: 'Transport de Marchandises', icon: '📦' },
 ];
 
+// Composant champ de saisie stable au niveau module (prévient toute perte de focus lors de la frappe)
+interface InputFieldProps {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  onClearError?: () => void;
+  placeholder: string;
+  icon: React.ComponentType<{ className?: string }>;
+  required?: boolean;
+  error?: string;
+  rightAction?: React.ReactNode;
+}
+
+const InputField: React.FC<InputFieldProps> = React.memo(({
+  id,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  onClearError,
+  placeholder,
+  icon: Icon,
+  required = true,
+  error,
+  rightAction,
+}) => (
+  <div>
+    <label htmlFor={id} className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+      {label} {required && <span className="text-amber-400 font-black">*</span>}
+    </label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+        <Icon className={`h-4 w-4 ${error ? 'text-red-400' : 'text-amber-400/80'}`} />
+      </div>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          if (onClearError) onClearError();
+        }}
+        placeholder={placeholder}
+        className={`w-full bg-slate-950 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all shadow-inner ${
+          error
+            ? 'border-red-500/80 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
+            : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+        }`}
+      />
+      {rightAction && (
+        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+          {rightAction}
+        </div>
+      )}
+    </div>
+    {error && (
+      <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1">
+        <AlertCircle className="w-3.5 h-3.5" />
+        {error}
+      </p>
+    )}
+  </div>
+));
+
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialRole = (searchParams.get('role') as UserRole) || 'CLIENT';
@@ -285,53 +351,6 @@ export const RegisterPage: React.FC = () => {
   }
 
   const needsStep2 = role === 'PROVIDER' || role === 'BUSINESS';
-
-  // Composant champ de saisie avec contraste parfait (Dark Mode Haute Précision)
-  const InputField = ({
-    id, label, type = 'text', value, onChange, placeholder, icon: Icon,
-    required = true, error, rightAction
-  }: {
-    id: string; label: string; type?: string; value: string;
-    onChange: (v: string) => void; placeholder: string;
-    icon: any; required?: boolean; error?: string; rightAction?: React.ReactNode;
-  }) => (
-    <div>
-      <label htmlFor={id} className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
-        {label} {required && <span className="text-amber-400 font-black">*</span>}
-      </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Icon className={`h-4 w-4 ${error ? 'text-red-400' : 'text-amber-400/80'}`} />
-        </div>
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value);
-            if (fieldErrors[id]) setFieldErrors((prev) => ({ ...prev, [id]: '' }));
-          }}
-          placeholder={placeholder}
-          className={`w-full bg-slate-950 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all shadow-inner ${
-            error
-              ? 'border-red-500/80 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
-              : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-          }`}
-        />
-        {rightAction && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            {rightAction}
-          </div>
-        )}
-      </div>
-      {error && (
-        <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1">
-          <AlertCircle className="w-3.5 h-3.5" />
-          {error}
-        </p>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
