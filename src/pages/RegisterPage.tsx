@@ -7,7 +7,7 @@ import type { UserRole, ServiceType } from '../lib/types';
 import {
   Compass, Mail, Lock, User, Phone, Car, Building2,
   AlertCircle, Loader2, ShieldCheck, CheckCircle2,
-  ArrowRight, Eye, EyeOff, Zap, Sparkles, MapPin
+  ArrowRight, Eye, EyeOff, Zap, Sparkles, MapPin, MessageSquare
 } from 'lucide-react';
 
 // Types de service avec labels et icônes
@@ -88,10 +88,10 @@ export const RegisterPage: React.FC = () => {
       errors.fullName = 'Nom complet requis (min. 3 caractères)';
     }
     if (!email.trim() || !email.includes('@') || !email.includes('.')) {
-      errors.email = 'Adresse e-mail invalide';
+      errors.email = 'Adresse e-mail valide requise';
     }
     if (!phone.trim() || phone.trim().length < 8) {
-      errors.phone = 'Numéro de téléphone invalide';
+      errors.phone = 'Numéro de téléphone requis (+228...)';
     }
     if (password.length < 6) {
       errors.password = 'Mot de passe trop court (min. 6 caractères)';
@@ -130,7 +130,7 @@ export const RegisterPage: React.FC = () => {
     e.preventDefault();
     setErrorMsg(null);
 
-    // Pour CLIENT, valider étape 1 uniquement. Pour PROVIDER/BUSINESS, valider étape 2
+    // Validation selon rôle et étape
     if (role !== 'CLIENT' && !validateStep2()) return;
     if (role === 'CLIENT' && !validateStep1()) return;
 
@@ -178,9 +178,7 @@ export const RegisterPage: React.FC = () => {
       }
 
       if (data?.user) {
-        // Cas A : Session créée immédiatement (email auto-confirm activé dans Supabase)
         if (data.session) {
-          // Synchronisation explicite du profil en base de données
           try {
             const profilePayload = {
               user_id: data.user.id,
@@ -199,7 +197,6 @@ export const RegisterPage: React.FC = () => {
               console.warn('Avertissement upsert profil:', profileError.message);
             }
 
-            // Profil spécialisé PROVIDER
             if (role === 'PROVIDER') {
               await supabase.from('provider_profiles').upsert({
                 user_id: data.user.id,
@@ -212,7 +209,6 @@ export const RegisterPage: React.FC = () => {
               }, { onConflict: 'user_id' });
             }
 
-            // Profil spécialisé BUSINESS
             if (role === 'BUSINESS') {
               await supabase.from('business_profiles').upsert({
                 user_id: data.user.id,
@@ -225,15 +221,10 @@ export const RegisterPage: React.FC = () => {
             console.warn('Synchronisation profil (non bloquante):', dbErr);
           }
 
-          // Rafraîchissement du contexte d'authentification
           await refreshProfile();
-
-          // Redirection vers le dashboard selon le rôle
           const targetRoute = getDashboardRouteForRole(role);
           navigate(targetRoute, { replace: true });
-
         } else {
-          // Cas B : Confirmation par e-mail requise
           setEmailConfirmationRequired(true);
         }
       }
@@ -249,27 +240,27 @@ export const RegisterPage: React.FC = () => {
   if (emailConfirmationRequired) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-          <div className="glass-panel py-10 px-8 rounded-3xl border border-emerald-500/30 shadow-2xl text-center space-y-6">
-            <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 mx-auto flex items-center justify-center">
+          <div className="bg-slate-900/90 backdrop-blur-2xl py-10 px-8 rounded-3xl border border-emerald-500/30 shadow-2xl text-center space-y-6">
+            <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/20">
               <CheckCircle2 className="w-12 h-12 text-emerald-400" />
             </div>
             <div>
               <h2 className="text-2xl font-black text-white mb-2">Compte créé avec succès !</h2>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-300 text-sm leading-relaxed">
                 Un e-mail de confirmation a été envoyé à :<br />
                 <strong className="text-amber-400 font-bold text-base">{email}</strong>
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-400 text-left space-y-2">
-              <p className="font-semibold text-slate-200 flex items-center gap-1.5 mb-3">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 text-left space-y-2.5">
+              <p className="font-semibold text-slate-100 flex items-center gap-1.5 mb-2">
                 <Mail className="w-4 h-4 text-amber-400" />
                 Étapes suivantes :
               </p>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
-                <span>Ouvrez votre boîte de réception.</span>
+                <span>Ouvrez votre boîte de réception e-mail.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
@@ -282,7 +273,7 @@ export const RegisterPage: React.FC = () => {
             </div>
             <Link
               to="/login"
-              className="w-full gold-gradient-btn py-3.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-3.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all"
             >
               <span>Aller à la page de connexion</span>
               <ArrowRight className="w-4 h-4" />
@@ -293,10 +284,9 @@ export const RegisterPage: React.FC = () => {
     );
   }
 
-  // ─── Indicateur de progression (wizard) ─────────────────────────────────
   const needsStep2 = role === 'PROVIDER' || role === 'BUSINESS';
 
-  // ─── Composant champ de saisie ───────────────────────────────────────────
+  // Composant champ de saisie avec contraste parfait (Dark Mode Haute Précision)
   const InputField = ({
     id, label, type = 'text', value, onChange, placeholder, icon: Icon,
     required = true, error, rightAction
@@ -306,12 +296,12 @@ export const RegisterPage: React.FC = () => {
     icon: any; required?: boolean; error?: string; rightAction?: React.ReactNode;
   }) => (
     <div>
-      <label htmlFor={id} className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-        {label} {required && <span className="text-amber-500">*</span>}
+      <label htmlFor={id} className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+        {label} {required && <span className="text-amber-400 font-black">*</span>}
       </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Icon className={`h-4 w-4 ${error ? 'text-red-400' : 'text-slate-500'}`} />
+          <Icon className={`h-4 w-4 ${error ? 'text-red-400' : 'text-amber-400/80'}`} />
         </div>
         <input
           id={id}
@@ -322,8 +312,10 @@ export const RegisterPage: React.FC = () => {
             if (fieldErrors[id]) setFieldErrors((prev) => ({ ...prev, [id]: '' }));
           }}
           placeholder={placeholder}
-          className={`w-full bg-slate-900 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
-            error ? 'border-red-500/70 focus:border-red-400' : 'border-slate-700 focus:border-amber-400 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)]'
+          className={`w-full bg-slate-950 border rounded-xl pl-10 ${rightAction ? 'pr-10' : 'pr-4'} py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all shadow-inner ${
+            error
+              ? 'border-red-500/80 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
+              : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
           }`}
         />
         {rightAction && (
@@ -333,8 +325,8 @@ export const RegisterPage: React.FC = () => {
         )}
       </div>
       {error && (
-        <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
+        <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1">
+          <AlertCircle className="w-3.5 h-3.5" />
           {error}
         </p>
       )}
@@ -343,41 +335,47 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background orbs */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/8 rounded-full blur-[100px] pointer-events-none" />
+      {/* Halos de lumière de fond */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Logo & heading */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10 text-center mb-8">
-        <Link to="/" className="inline-flex items-center justify-center gap-2.5 group mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
-            <Compass className="w-7 h-7 text-white stroke-[2.5]" />
+      {/* En-tête avec logo & localisation officielle */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10 text-center mb-6">
+        <Link to="/" className="inline-flex items-center justify-center gap-3 group mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
+            <Compass className="w-7 h-7 text-slate-950 stroke-[2.5]" />
           </div>
           <span className="text-3xl font-black text-white tracking-tight">KONDU</span>
         </Link>
 
+        {/* Badge de localisation officielle */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-amber-500/30 text-amber-300 text-xs font-bold mb-3 shadow-md">
+          <MapPin className="w-3.5 h-3.5 text-amber-400" />
+          <span>Réseau Officiel — Lomé, Togo 🇹🇬</span>
+        </div>
+
         <h1 className="text-2xl sm:text-3xl font-black text-white">
           Rejoindre le réseau KONDU
         </h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-1.5 text-sm text-slate-400">
           Sélectionnez votre type de compte pour démarrer
         </p>
 
-        {/* Progress bar (si wizard) */}
+        {/* Barre de progression wizard */}
         {needsStep2 && (
           <div className="mt-4 flex items-center justify-center gap-3">
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= 1 ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-400'}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= 1 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
                 1
               </div>
-              <span className={`text-xs font-medium ${step >= 1 ? 'text-amber-400' : 'text-slate-500'}`}>Compte</span>
+              <span className={`text-xs font-bold ${step >= 1 ? 'text-amber-400' : 'text-slate-500'}`}>Compte</span>
             </div>
-            <div className={`flex-1 max-w-[60px] h-0.5 ${step >= 2 ? 'bg-amber-500' : 'bg-slate-700'} transition-colors`} />
+            <div className={`flex-1 max-w-[60px] h-0.5 ${step >= 2 ? 'bg-amber-500' : 'bg-slate-800'} transition-colors`} />
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= 2 ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-400'}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= 2 ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
                 2
               </div>
-              <span className={`text-xs font-medium ${step >= 2 ? 'text-amber-400' : 'text-slate-500'}`}>
+              <span className={`text-xs font-bold ${step >= 2 ? 'text-amber-400' : 'text-slate-500'}`}>
                 {role === 'PROVIDER' ? 'Véhicule' : 'Entreprise'}
               </span>
             </div>
@@ -385,12 +383,15 @@ export const RegisterPage: React.FC = () => {
         )}
       </div>
 
-      {/* Main form card */}
+      {/* Carte principale Dark Mode Haute Précision */}
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-        <div className="glass-panel py-8 px-6 sm:px-10 rounded-3xl border border-slate-800 shadow-2xl">
+        <div className="bg-slate-900/95 backdrop-blur-2xl py-8 px-6 sm:px-10 rounded-3xl border border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          
+          {/* Ligne dorée supérieure d'accentuation */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-600" />
 
           {/* Sélecteur de rôle */}
-          <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-800 mb-7">
+          <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-950 rounded-2xl border border-slate-800 mb-6">
             {[
               { value: 'CLIENT' as UserRole, icon: <MapPin className="w-4 h-4" />, label: 'Passager' },
               { value: 'PROVIDER' as UserRole, icon: <Car className="w-4 h-4" />, label: 'Chauffeur' },
@@ -400,12 +401,12 @@ export const RegisterPage: React.FC = () => {
                 key={value}
                 type="button"
                 onClick={() => setRole(value)}
-                className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1.5 ${
+                className={`py-2.5 px-2 rounded-xl text-xs font-black transition-all flex flex-col items-center gap-1.5 ${
                   role === value
                     ? value === 'BUSINESS'
-                      ? 'bg-blue-500 text-white shadow-md'
-                      : 'bg-amber-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
                 {icon}
@@ -416,9 +417,9 @@ export const RegisterPage: React.FC = () => {
 
           {/* Message d'erreur global */}
           {errorMsg && (
-            <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-start gap-3">
+            <div className="mb-6 p-4 rounded-2xl bg-red-500/15 border border-red-500/40 text-red-300 text-sm flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-              <div>{errorMsg}</div>
+              <div className="font-medium">{errorMsg}</div>
             </div>
           )}
 
@@ -443,42 +444,42 @@ export const RegisterPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={setEmail}
-                  placeholder="exemple@email.com"
+                  placeholder="kondutogo@mail.com"
                   icon={Mail}
                   error={fieldErrors.email}
                 />
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <InputField
                     id="phone"
-                    label="Téléphone"
+                    label="Téléphone (Appels)"
                     type="tel"
                     value={phone}
                     onChange={setPhone}
-                    placeholder="+229 97 00 00 00"
+                    placeholder="+228 99 25 52 31"
                     icon={Phone}
                     error={fieldErrors.phone}
                   />
                   <InputField
                     id="whatsapp"
-                    label="WhatsApp"
+                    label="WhatsApp Direct"
                     type="tel"
                     value={whatsapp}
                     onChange={setWhatsapp}
-                    placeholder="Même numéro"
-                    icon={Phone}
+                    placeholder="+228 93 91 92 12"
+                    icon={MessageSquare}
                     required={false}
                   />
                 </div>
 
                 {/* Mot de passe */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Mot de passe <span className="text-amber-500">*</span>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+                    Mot de passe <span className="text-amber-400 font-black">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock className={`h-4 w-4 ${fieldErrors.password ? 'text-red-400' : 'text-slate-500'}`} />
+                      <Lock className={`h-4 w-4 ${fieldErrors.password ? 'text-red-400' : 'text-amber-400/80'}`} />
                     </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -488,19 +489,21 @@ export const RegisterPage: React.FC = () => {
                         if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
                       }}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-900 border rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
-                        fieldErrors.password ? 'border-red-500/70' : 'border-slate-700 focus:border-amber-400'
+                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                        fieldErrors.password
+                          ? 'border-red-500/80 focus:border-red-400'
+                          : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {/* Force du mot de passe */}
+                  {/* Indicateur de force */}
                   {password && (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex-1 flex gap-1 h-1.5">
@@ -508,7 +511,7 @@ export const RegisterPage: React.FC = () => {
                           <div
                             key={i}
                             className={`flex-1 rounded-full transition-all ${
-                              i <= passwordStrength().score ? passwordStrength().color : 'bg-slate-700'
+                              i <= passwordStrength().score ? passwordStrength().color : 'bg-slate-800'
                             }`}
                           />
                         ))}
@@ -521,20 +524,20 @@ export const RegisterPage: React.FC = () => {
                     </div>
                   )}
                   {fieldErrors.password && (
-                    <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />{fieldErrors.password}
+                    <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />{fieldErrors.password}
                     </p>
                   )}
                 </div>
 
                 {/* Confirmation mot de passe */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Confirmer le mot de passe <span className="text-amber-500">*</span>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+                    Confirmer le mot de passe <span className="text-amber-400 font-black">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock className={`h-4 w-4 ${fieldErrors.confirmPassword ? 'text-red-400' : 'text-slate-500'}`} />
+                      <Lock className={`h-4 w-4 ${fieldErrors.confirmPassword ? 'text-red-400' : 'text-amber-400/80'}`} />
                     </div>
                     <input
                       type={showConfirm ? 'text' : 'password'}
@@ -544,26 +547,28 @@ export const RegisterPage: React.FC = () => {
                         if (fieldErrors.confirmPassword) setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
                       }}
                       placeholder="••••••••"
-                      className={`w-full bg-slate-900 border rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
-                        fieldErrors.confirmPassword ? 'border-red-500/70' : 'border-slate-700 focus:border-amber-400'
-                      } ${confirmPassword && confirmPassword === password ? 'border-emerald-500/50' : ''}`}
+                      className={`w-full bg-slate-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none transition-all ${
+                        fieldErrors.confirmPassword
+                          ? 'border-red-500/80 focus:border-red-400'
+                          : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                      } ${confirmPassword && confirmPassword === password ? 'border-emerald-500/60' : ''}`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
                     >
                       {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {confirmPassword && confirmPassword === password && (
-                    <p className="mt-1.5 text-xs text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Mots de passe identiques
+                    <p className="mt-1.5 text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Mots de passe identiques
                     </p>
                   )}
                   {fieldErrors.confirmPassword && (
-                    <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />{fieldErrors.confirmPassword}
+                    <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />{fieldErrors.confirmPassword}
                     </p>
                   )}
                 </div>
@@ -575,13 +580,12 @@ export const RegisterPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider pb-2 border-b border-slate-800">
                   <Car className="w-4 h-4" />
-                  Informations Véhicule & Prestation
+                  Informations Véhicule & Prestation (Lomé, Togo)
                 </div>
 
-                {/* Type de service */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Type de service <span className="text-amber-500">*</span>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2">
+                    Type de transport <span className="text-amber-400 font-black">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {SERVICE_OPTIONS.map(({ value, label, icon }) => (
@@ -589,10 +593,10 @@ export const RegisterPage: React.FC = () => {
                         key={value}
                         type="button"
                         onClick={() => setServiceType(value)}
-                        className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs text-left font-medium transition-all ${
+                        className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs text-left font-semibold transition-all ${
                           serviceType === value
-                            ? 'border-amber-500 bg-amber-500/10 text-amber-300'
-                            : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600'
+                            ? 'border-amber-400 bg-amber-500/15 text-amber-300 shadow-md'
+                            : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 hover:text-white'
                         }`}
                       >
                         <span className="text-lg">{icon}</span>
@@ -605,10 +609,10 @@ export const RegisterPage: React.FC = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <InputField
                     id="vehicleBrand"
-                    label="Marque *"
+                    label="Marque"
                     value={vehicleBrand}
                     onChange={setVehicleBrand}
-                    placeholder="Haojue / Toyota"
+                    placeholder="Ex: Haojue / Toyota"
                     icon={Car}
                     error={fieldErrors.vehicleBrand}
                   />
@@ -617,13 +621,13 @@ export const RegisterPage: React.FC = () => {
                     label="Modèle"
                     value={vehicleModel}
                     onChange={setVehicleModel}
-                    placeholder="110cc / Corolla"
+                    placeholder="Ex: 110cc / Corolla"
                     icon={Zap}
                     required={false}
                   />
                   <div className="sm:col-span-1">
-                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                      Plaque <span className="text-amber-500">*</span>
+                    <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+                      Plaque Togo <span className="text-amber-400 font-black">*</span>
                     </label>
                     <input
                       type="text"
@@ -632,25 +636,26 @@ export const RegisterPage: React.FC = () => {
                         setVehiclePlate(e.target.value.toUpperCase());
                         if (fieldErrors.vehiclePlate) setFieldErrors((prev) => ({ ...prev, vehiclePlate: '' }));
                       }}
-                      placeholder="AY 1234 RB"
-                      className={`w-full bg-slate-900 border rounded-xl px-3 py-2.5 text-sm text-white uppercase placeholder-slate-500 focus:outline-none transition-all ${
-                        fieldErrors.vehiclePlate ? 'border-red-500/70' : 'border-slate-700 focus:border-amber-400'
+                      placeholder="TG 1234 AB"
+                      className={`w-full bg-slate-950 border rounded-xl px-3 py-3 text-sm text-white uppercase placeholder:text-slate-500 focus:outline-none transition-all ${
+                        fieldErrors.vehiclePlate
+                          ? 'border-red-500/80 focus:border-red-400'
+                          : 'border-slate-700/80 hover:border-slate-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
                       }`}
                     />
                     {fieldErrors.vehiclePlate && (
-                      <p className="mt-1.5 text-xs text-red-400">{fieldErrors.vehiclePlate}</p>
+                      <p className="mt-1.5 text-xs text-red-400 font-medium">{fieldErrors.vehiclePlate}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Info forfait */}
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold mb-2">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Offre de lancement KONDU PRO
+                  <div className="flex items-center gap-2 text-amber-400 text-xs font-bold mb-1.5">
+                    <Sparkles className="w-4 h-4" />
+                    Offre de lancement Spéciale Togo
                   </div>
-                  <p className="text-slate-300 text-xs">
-                    Accès complet pendant <strong>7 jours gratuits</strong> dès validation de votre profil. Puis forfait dès <strong>200 F CFA/jour</strong> — aucune commission prélevée.
+                  <p className="text-slate-300 text-xs leading-relaxed">
+                    Bénéficiez de <strong>7 jours d'essai 100% gratuits</strong> dès validation de votre compte à Lomé. Ensuite seulement <strong>200 F CFA/jour</strong> et <strong>0% de commission</strong> prélevée sur vos gains !
                   </p>
                 </div>
               </div>
@@ -661,7 +666,7 @@ export const RegisterPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider pb-2 border-b border-slate-800">
                   <Building2 className="w-4 h-4" />
-                  Informations de l'Entreprise
+                  Informations de l'Entreprise (Togo)
                 </div>
 
                 <InputField
@@ -669,7 +674,7 @@ export const RegisterPage: React.FC = () => {
                   label="Raison sociale / Nom commercial"
                   value={companyName}
                   onChange={setCompanyName}
-                  placeholder="Africa Trading SARL"
+                  placeholder="Ex: Togo Distribution SARL"
                   icon={Building2}
                   error={fieldErrors.companyName}
                 />
@@ -677,10 +682,10 @@ export const RegisterPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <InputField
                     id="registrationNumber"
-                    label="N° RCCM / IFU"
+                    label="N° NIF / RCCM"
                     value={registrationNumber}
                     onChange={setRegistrationNumber}
-                    placeholder="RB/COT/23..."
+                    placeholder="TG-LOM-..."
                     icon={ShieldCheck}
                     required={false}
                   />
@@ -689,32 +694,31 @@ export const RegisterPage: React.FC = () => {
                     label="Secteur d'activité"
                     value={businessType}
                     onChange={setBusinessType}
-                    placeholder="E-commerce, Grossiste..."
+                    placeholder="Commerce, Logistique..."
                     icon={Building2}
                     required={false}
                   />
                 </div>
 
                 <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                  <div className="flex items-center gap-2 text-blue-400 text-xs font-bold mb-2">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Compte Business KONDU
+                  <div className="flex items-center gap-2 text-blue-400 text-xs font-bold mb-1.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Avantages Compte Entreprise KONDU
                   </div>
-                  <p className="text-slate-300 text-xs">
-                    Accédez au dashboard centralisé, commandez en masse et bénéficiez de <strong>tarifs négociés</strong> sur vos volumes de transport.
+                  <p className="text-slate-300 text-xs leading-relaxed">
+                    Plateforme centralisée pour commander des transports et livraisons avec facturation mensuelle et suivi GPS en temps réel.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* ── Boutons de navigation ─────────────────────────────────── */}
+            {/* ── Boutons de soumission / étape ──────────────────────────── */}
             <div className="pt-2">
-              {/* CLIENT : submit direct */}
               {role === 'CLIENT' && (
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full gold-gradient-btn py-4 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-3.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {isSubmitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /><span>Création de votre compte...</span></>
@@ -724,37 +728,35 @@ export const RegisterPage: React.FC = () => {
                 </button>
               )}
 
-              {/* PROVIDER/BUSINESS étape 1 : bouton Suivant */}
               {needsStep2 && step === 1 && (
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="w-full gold-gradient-btn py-4 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25"
+                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-3.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30 transition-all"
                 >
-                  <span>Continuer — Étape 2 sur 2</span>
+                  <span>Continuer vers l'étape 2</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
 
-              {/* PROVIDER/BUSINESS étape 2 : boutons Retour + Créer */}
               {needsStep2 && step === 2 && (
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="px-5 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-colors"
+                    className="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-colors"
                   >
                     ← Retour
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 gold-gradient-btn py-4 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-3.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {isSubmitting ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /><span>Création...</span></>
+                      <><Loader2 className="w-4 h-4 animate-spin" /><span>Création en cours...</span></>
                     ) : (
-                      <><ShieldCheck className="w-4 h-4" /><span>Créer mon compte</span></>
+                      <><ShieldCheck className="w-4 h-4" /><span>Valider mon inscription</span></>
                     )}
                   </button>
                 </div>
@@ -767,10 +769,50 @@ export const RegisterPage: React.FC = () => {
             <p className="text-xs text-slate-400">
               Vous avez déjà un compte ?{' '}
               <Link to="/login" className="text-amber-400 font-bold hover:underline hover:text-amber-300 transition-colors">
-                Se connecter →
+                Se connecter ici →
               </Link>
             </p>
           </div>
+
+          {/* ── Coordonnées Officielles Togo (Lomé) ──────────────────────── */}
+          <div className="mt-6 pt-4 border-t border-slate-800/80">
+            <div className="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/20 shadow-lg">
+              <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-800">
+                <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" /> Siège KONDU — Lomé, Togo
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  Support Direct
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-300">
+                <a
+                  href="https://wa.me/22893919212"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 hover:bg-emerald-500/10 border border-slate-800 hover:border-emerald-500/40 transition-all text-slate-200"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="truncate">WA: <strong className="text-emerald-400">+228 93919212</strong></span>
+                </a>
+                <a
+                  href="tel:+22899255231"
+                  className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 transition-all text-slate-200"
+                >
+                  <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="truncate">Tél: <strong className="text-amber-400">+228 99255231</strong></span>
+                </a>
+                <a
+                  href="mailto:kondutogo@mail.com"
+                  className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 hover:bg-blue-500/10 border border-slate-800 hover:border-blue-500/40 transition-all text-slate-200"
+                >
+                  <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <span className="truncate">Email: <strong className="text-blue-400">kondutogo@mail.com</strong></span>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

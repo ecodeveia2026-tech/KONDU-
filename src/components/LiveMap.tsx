@@ -81,8 +81,8 @@ interface LiveMapProps {
 }
 
 export const LiveMap: React.FC<LiveMapProps> = ({
-  centerLat = 6.3703, // Cotonou par défaut (point d'ancrage Afrique de l'Ouest)
-  centerLng = 2.3912,
+  centerLat = 6.1375, // Lomé, Togo par défaut
+  centerLng = 1.2123,
   zoom = 14,
   providers = [],
   pickupCoords,

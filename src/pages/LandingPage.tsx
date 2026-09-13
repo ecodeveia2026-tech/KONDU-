@@ -10,10 +10,10 @@ const PhoneMockup: React.FC = () => (
   <div className="phone-mockup animate-float-phone">
     <div className="phone-screen">
 
-      {/* ── GOOGLE MAPS EMBED (Cotonou, Bénin) ── */}
+      {/* ── GOOGLE MAPS EMBED (Lomé, Togo) ── */}
       <iframe
-        title="KONDU Google Maps"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31736.10743899537!2d2.373604!3d6.3590282!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1024a9a9df256dcd%3A0xa6c2df70e2778e27!2sCotonou%2C%20B%C3%A9nin!5e0!3m2!1sfr!2sfr!4v1710000000000!5m2!1sfr!2sfr"
+        title="KONDU Google Maps Lomé Togo"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63467.43343360408!2d1.185671!3d6.172504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1023e1c113185419%3A0x3224b5422caf411d!2sLom%C3%A9%2C%20Togo!5e0!3m2!1sfr!2stg!4v1710000000000!5m2!1sfr!2stg"
         style={{
           position: 'absolute',
           inset: 0,
@@ -91,11 +91,11 @@ const PhoneMockup: React.FC = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f8fafc', borderRadius: 8, padding: '5px 8px' }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0ea5e9', flexShrink: 0 }} />
-            <span style={{ fontSize: 9, color: '#475569', fontWeight: 500 }}>Étoile Rouge / Centre-ville</span>
+            <span style={{ fontSize: 9, color: '#475569', fontWeight: 500 }}>Déckon / Grand Marché Lomé</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f8fafc', borderRadius: 8, padding: '5px 8px' }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-            <span style={{ fontSize: 9, color: '#475569', fontWeight: 500 }}>Aéroport Int. / Haie Vive</span>
+            <span style={{ fontSize: 9, color: '#475569', fontWeight: 500 }}>Aéroport Int. / Baguida</span>
           </div>
         </div>
         <button style={{
@@ -781,45 +781,51 @@ export const LandingPage: React.FC = () => {
                   backgroundClip: 'text'
                 }}>KONDU</span>
               </div>
-              <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
-                La plateforme de mobilité africaine. Transport, livraison et services à portée de main.
+              <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6, marginBottom: 12 }}>
+                La plateforme de mobilité de référence à <strong>Lomé, Togo 🇹🇬</strong>. Transport, livraison et services avec <strong>0% de commission</strong>.
               </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, color: '#cbd5e1' }}>
+                <a href="https://wa.me/22893919212" target="_blank" rel="noreferrer" style={{ color: '#22c55e', textDecoration: 'none', fontWeight: 600 }}>
+                  💬 WhatsApp: +228 93 91 92 12
+                </a>
+                <a href="tel:+22899255231" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 600 }}>
+                  📞 Appel: +228 99 25 52 31
+                </a>
+                <a href="mailto:kondutogo@mail.com" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 600 }}>
+                  ✉️ Email: kondutogo@mail.com
+                </a>
+              </div>
             </div>
             {[
               { title: 'Services', links: ['Moto-Taxi', 'Taxi Confort', 'Tricycle', 'Berline VIP', 'Déménagement'] },
               { title: 'Chauffeurs', links: ['Pass 24H — 200 F', 'Pass 7 Jours', 'KONDU VIP', 'KONDU Business', 'Devenir partenaire'] },
-              { title: 'Support', links: ["Centre d'aide", 'Contact', 'F.A.Q', "Conditions d'utilisation", 'Confidentialité'] },
+              { title: 'Support & Ville', links: ['Lomé, Togo 🇹🇬', "Centre d'aide", 'Support 24/7', 'Conditions', 'Confidentialité'] },
             ].map(({ title, links }) => (
               <div key={title}>
                 <h4 style={{ fontSize: 13, fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>{title}</h4>
                 {links.map((link) => (
-                  <a key={link} href="#" style={{ display: 'block', fontSize: 14, color: '#64748b', marginBottom: 10, textDecoration: 'none', transition: 'color 0.2s' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#0ea5e9')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#64748b')}
-                  >{link}</a>
+                  <span key={link} style={{ display: 'block', fontSize: 14, color: '#94a3b8', marginBottom: 10 }}>{link}</span>
                 ))}
               </div>
             ))}
           </div>
           <div style={{ borderTop: '1px solid #1e293b', paddingTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <p style={{ fontSize: 13, color: '#475569' }}>
-              © {new Date().getFullYear()} KONDU. Tous droits réservés.
+            <p style={{ fontSize: 13, color: '#64748b' }}>
+              © {new Date().getFullYear()} KONDU Togo. Tous droits réservés. Modèle équitable à 0% de commission.
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {[
-                { icon: '📱', label: 'WhatsApp' },
-                { icon: '📘', label: 'Facebook' },
-                { icon: '📸', label: 'Instagram' },
-              ].map(({ icon, label }) => (
-                <a key={label} href="#" title={label} style={{
-                  width: 36, height: 36, borderRadius: 10, background: '#1e293b',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, textDecoration: 'none', transition: 'background 0.2s'
-                }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#334155')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = '#1e293b')}
-                >{icon}</a>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <a href="https://wa.me/22893919212" target="_blank" rel="noreferrer" title="WhatsApp +228 93919212" style={{
+                padding: '6px 12px', borderRadius: 10, background: '#14532d', color: '#86efac',
+                fontSize: 12, fontWeight: 700, textDecoration: 'none'
+              }}>
+                WhatsApp +228 93919212
+              </a>
+              <a href="tel:+22899255231" title="Appel +228 99255231" style={{
+                padding: '6px 12px', borderRadius: 10, background: '#78350f', color: '#fde68a',
+                fontSize: 12, fontWeight: 700, textDecoration: 'none'
+              }}>
+                Appel +228 99255231
+              </a>
             </div>
           </div>
         </div>
