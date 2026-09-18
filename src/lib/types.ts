@@ -10,7 +10,7 @@ export type SubscriptionStatus =
   | 'pending' | 'active' | 'expired' | 'suspended' | 'cancelled'
   | 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'FAILED';
 
-export type OrderStatus = 'created' | 'searching' | 'accepted' | 'arriving' | 'in_progress' | 'completed' | 'cancelled';
+export type OrderStatus = 'CREATED' | 'SEARCHING' | 'PROVIDER_ACCEPTED' | 'ARRIVING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
 

@@ -259,7 +259,7 @@ export const ClientDashboard: React.FC = () => {
         .from('orders')
         .select('*, client:profiles!orders_client_id_fkey(*)')
         .eq('client_id', user.id)
-        .in('status', ['created', 'searching', 'accepted', 'arriving', 'in_progress'])
+        .in('status', ['CREATED', 'SEARCHING', 'PROVIDER_ACCEPTED', 'ARRIVING', 'IN_PROGRESS'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -276,7 +276,7 @@ export const ClientDashboard: React.FC = () => {
         .from('orders')
         .select('*')
         .eq('client_id', user.id)
-        .in('status', ['completed', 'cancelled'])
+        .in('status', ['COMPLETED', 'CANCELLED'])
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -330,7 +330,7 @@ export const ClientDashboard: React.FC = () => {
         },
         async (payload) => {
           const updated = payload.new as Order;
-          if (updated.status === 'completed') {
+          if (updated.status === 'COMPLETED') {
             confetti({ particleCount: 80, spread: 60 });
             setShowReviewModal(true);
           }
@@ -376,7 +376,7 @@ export const ClientDashboard: React.FC = () => {
           client_id: user.id,
           provider_id: selectedDriverId || null,
           service_type: serviceType,
-          status: 'searching',
+          status: 'SEARCHING',
           pickup_address: pickupAddress || 'Position actuelle (GPS Lomé)',
           pickup_latitude: clientLat,
           pickup_longitude: clientLng,
@@ -428,7 +428,7 @@ export const ClientDashboard: React.FC = () => {
       await supabase
         .from('orders')
         .update({
-          status: 'cancelled',
+          status: 'CANCELLED',
           cancelled_by: user?.id,
           cancellation_reason: 'Annulé par le client',
         })
@@ -601,7 +601,7 @@ export const ClientDashboard: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">Course en cours #{activeOrder.id.slice(0, 8)}</h3>
                   <span className="text-xs text-amber-700 uppercase font-semibold">
-                    Statut : {activeOrder.status === 'searching' ? 'Recherche d’un chauffeur à proximité...' : 'Chauffeur confirmé'}
+                    Statut : {activeOrder.status === 'SEARCHING' ? 'Recherche d’un chauffeur à proximité...' : 'Chauffeur confirmé'}
                   </span>
                 </div>
               </div>
@@ -1312,9 +1312,9 @@ export const ClientDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 text-sm capitalize">{ord.service_type}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        ord.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                        ord.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {ord.status === 'completed' ? 'Terminé' : 'Annulé'}
+                        {ord.status === 'COMPLETED' ? 'Terminé' : 'Annulé'}
                       </span>
                     </div>
                     <p className="text-slate-600 mt-1">

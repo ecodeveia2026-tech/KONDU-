@@ -165,7 +165,7 @@ export const BusinessDashboard: React.FC = () => {
       const { error } = await supabase.from('orders').insert({
         client_id: user.id,
         service_type: serviceType,
-        status: 'searching',
+        status: 'SEARCHING',
         pickup_address: pickupAddress.trim(),
         pickup_latitude: lat,
         pickup_longitude: lng,
@@ -266,7 +266,7 @@ export const BusinessDashboard: React.FC = () => {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <span className="text-xs text-slate-500 font-semibold block">Courses en Cours</span>
             <span className="text-2xl font-black text-amber-600 mt-1 block">
-              {orders.filter((o) => ['searching', 'accepted', 'in_progress'].includes(o.status)).length}
+              {orders.filter((o) => ['SEARCHING', 'PROVIDER_ACCEPTED', 'IN_PROGRESS'].includes(o.status)).length}
             </span>
           </div>
 

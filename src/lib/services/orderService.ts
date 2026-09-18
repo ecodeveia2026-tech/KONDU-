@@ -144,7 +144,7 @@ class OrderService {
           client_id: params.clientId,
           provider_id: params.providerId || null,
           service_type: params.serviceType,
-          status: 'searching',
+          status: 'SEARCHING',
           pickup_address: params.pickupAddress,
           pickup_latitude: params.pickupLat,
           pickup_longitude: params.pickupLng,
@@ -214,7 +214,7 @@ class OrderService {
         .eq('id', orderId)
         .single();
 
-      if (existingOrder?.status !== 'searching' && existingOrder?.status !== 'created') {
+      if (existingOrder?.status !== 'SEARCHING' && existingOrder?.status !== 'CREATED') {
         return { success: false, error: 'Cette course n\'est plus disponible.' };
       }
 
@@ -222,11 +222,11 @@ class OrderService {
         .from('orders')
         .update({
           provider_id: providerId,
-          status: 'accepted',
+          status: 'PROVIDER_ACCEPTED',
           accepted_at: new Date().toISOString(),
         })
         .eq('id', orderId)
-        .in('status', ['searching', 'created']);
+        .in('status', ['SEARCHING', 'CREATED']);
 
       if (updateError) {
         return { success: false, error: updateError.message };

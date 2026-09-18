@@ -221,7 +221,7 @@ export const ProviderDashboard: React.FC = () => {
         .from('orders')
         .select('*, client:profiles!orders_client_id_fkey(*)')
         .eq('provider_id', user.id)
-        .in('status', ['accepted', 'arriving', 'in_progress'])
+        .in('status', ['PROVIDER_ACCEPTED', 'ARRIVING', 'IN_PROGRESS'])
         .maybeSingle();
 
       if (currentOrder) {
@@ -234,7 +234,7 @@ export const ProviderDashboard: React.FC = () => {
           .from('orders')
           .select('*, client:profiles!orders_client_id_fkey(*)')
           .or(`provider_id.is.null,provider_id.eq.${user.id}`)
-          .eq('status', 'searching')
+          .eq('status', 'SEARCHING')
           .order('created_at', { ascending: false })
           .limit(8);
 
@@ -288,11 +288,11 @@ export const ProviderDashboard: React.FC = () => {
           .from('orders')
           .update({
             provider_id: user.id,
-            status: 'accepted',
+            status: 'PROVIDER_ACCEPTED',
             accepted_at: new Date().toISOString(),
           })
           .eq('id', orderId)
-          .eq('status', 'searching')
+          .eq('status', 'SEARCHING')
           .select('*, client:profiles!orders_client_id_fkey(*)')
           .single();
 
@@ -315,11 +315,11 @@ export const ProviderDashboard: React.FC = () => {
   };
 
   // Mise à jour de l'état de la course en cours
-  const handleUpdateOrderStatus = async (newStatus: 'arriving' | 'in_progress' | 'completed') => {
+  const handleUpdateOrderStatus = async (newStatus: 'ARRIVING' | 'IN_PROGRESS' | 'COMPLETED') => {
     if (!activeOrder) return;
     try {
       const updates: Record<string, any> = { status: newStatus };
-      if (newStatus === 'completed') {
+      if (newStatus === 'COMPLETED') {
         updates.completed_at = new Date().toISOString();
         updates.final_price = activeOrder.estimated_price;
       }
@@ -329,7 +329,7 @@ export const ProviderDashboard: React.FC = () => {
         .update(updates)
         .eq('id', activeOrder.id);
 
-      if (newStatus === 'completed') {
+      if (newStatus === 'COMPLETED') {
         confetti({ particleCount: 100, spread: 80 });
         setActiveOrder(null);
       }
@@ -534,27 +534,27 @@ export const ProviderDashboard: React.FC = () => {
 
             {/* Boutons d'avancement de la course */}
             <div className="pt-2 flex flex-wrap items-center gap-3">
-              {activeOrder.status === 'accepted' && (
+              {activeOrder.status === 'PROVIDER_ACCEPTED' && (
                 <button
-                  onClick={() => handleUpdateOrderStatus('arriving')}
+                  onClick={() => handleUpdateOrderStatus('ARRIVING')}
                   className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm"
                 >
                   Je suis arrivé au point de ramassage &rarr;
                 </button>
               )}
 
-              {activeOrder.status === 'arriving' && (
+              {activeOrder.status === 'ARRIVING' && (
                 <button
-                  onClick={() => handleUpdateOrderStatus('in_progress')}
+                  onClick={() => handleUpdateOrderStatus('IN_PROGRESS')}
                   className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm"
                 >
                   Le client est à bord / Démarrer le trajet &rarr;
                 </button>
               )}
 
-              {activeOrder.status === 'in_progress' && (
+              {activeOrder.status === 'IN_PROGRESS' && (
                 <button
-                  onClick={() => handleUpdateOrderStatus('completed')}
+                  onClick={() => handleUpdateOrderStatus('COMPLETED')}
                   className="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md"
                 >
                   Terminer la course & Encaisser {activeOrder.estimated_price} F &rarr;

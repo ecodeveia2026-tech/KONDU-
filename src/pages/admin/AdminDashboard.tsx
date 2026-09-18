@@ -902,7 +902,7 @@ export const AdminDashboard: React.FC = () => {
                   <div>
                     <span className="text-slate-500 text-xs font-semibold">Demandes Clients Actives</span>
                     <div className="text-2xl font-black text-amber-600 mt-1">
-                      {orders.filter((o) => o.status === 'searching' || o.status === 'arriving' || o.status === 'in_progress').length}
+                      {orders.filter((o) => o.status === 'SEARCHING' || o.status === 'ARRIVING' || o.status === 'IN_PROGRESS').length}
                     </div>
                     <span className="text-[10px] text-amber-600 font-bold flex items-center gap-1 mt-0.5">
                       <Activity className="w-3 h-3" /> En cours de traitement
@@ -957,7 +957,7 @@ export const AdminDashboard: React.FC = () => {
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Chauffeurs ({providers.filter((p) => p.is_online).length})
                         </span>
                         <span className="flex items-center gap-1 text-blue-600 font-semibold">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Commandes ({orders.filter((o) => o.status === 'searching' || o.status === 'in_progress').length})
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Commandes ({orders.filter((o) => o.status === 'SEARCHING' || o.status === 'IN_PROGRESS').length})
                         </span>
                       </div>
                     </div>
