@@ -22,6 +22,7 @@ import {
   RotateCw,
   Camera
 } from 'lucide-react';
+import { LiveMap } from '../../components/LiveMap';
 
 export const ProviderDashboard: React.FC = () => {
   const { user, profile, providerProfile, refreshProfile } = useAuth();
@@ -530,6 +531,28 @@ export const ProviderDashboard: React.FC = () => {
                 <span className="text-red-700 font-semibold block mb-1">Destination :</span>
                 <span className="text-slate-900">{activeOrder.dropoff_address}</span>
               </div>
+            </div>
+
+            {/* GPRS Ultra-Pro Navigation */}
+            <div className="mt-4 border border-slate-200 rounded-3xl overflow-hidden shadow-inner bg-slate-100">
+              <div className="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-amber-400">
+                  <Navigation className="w-4 h-4" /> GPRS Navigation Pro
+                </span>
+                <span className="text-[10px] font-mono opacity-80 text-emerald-400">Suivi temps réel actif</span>
+              </div>
+              <LiveMap
+                className="h-[300px] sm:h-[400px] w-full"
+                showLocalityMarkers={false}
+                providers={providerProfile && providerProfile.current_lat ? [{ ...providerProfile, profile: profile } as any] : []}
+                pickupCoords={[activeOrder.pickup_lat, activeOrder.pickup_lng]}
+                pickupAddress={activeOrder.pickup_address}
+                dropoffCoords={activeOrder.dropoff_lat && activeOrder.dropoff_lng ? [activeOrder.dropoff_lat, activeOrder.dropoff_lng] : undefined}
+                dropoffAddress={activeOrder.dropoff_address}
+                centerLat={providerProfile?.current_lat || activeOrder.pickup_lat}
+                centerLng={providerProfile?.current_lng || activeOrder.pickup_lng}
+                zoom={14}
+              />
             </div>
 
             {/* Boutons d'avancement de la course */}
