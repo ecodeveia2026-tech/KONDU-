@@ -65,6 +65,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isMounted.current) return;
 
       if (profileData) {
+        // CORRECTION PRIORITAIRE : Forcer le rôle ADMIN pour daaup2580@gmail.com
+        if (currentUser.email === 'daaup2580@gmail.com' && profileData.role !== 'ADMIN') {
+          profileData.role = 'ADMIN';
+          // Met à jour la base de données de manière asynchrone pour la prochaine fois
+          supabase.from('profiles').update({ role: 'ADMIN' }).eq('user_id', currentUser.id).then(({ error }) => {
+            if (error) console.error('Erreur lors de la mise à jour forcée du rôle ADMIN:', error.message);
+          });
+        }
+
         setProfile(profileData as Profile);
         setRole(profileData.role as UserRole);
 
@@ -90,7 +99,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // Fallback : profil non encore créé par le trigger — on crée depuis les metadata
-        const metaRole = (currentUser.user_metadata?.role as UserRole) || 'CLIENT';
+        let metaRole = (currentUser.user_metadata?.role as UserRole) || 'CLIENT';
+        if (currentUser.email === 'daaup2580@gmail.com') {
+          metaRole = 'ADMIN';
+        }
         const metaName = currentUser.user_metadata?.full_name
           || currentUser.email?.split('@')[0]
           || 'Utilisateur';

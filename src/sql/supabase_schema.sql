@@ -601,12 +601,16 @@ CREATE POLICY "Admin audit logs" ON public.admin_audit_logs FOR ALL USING (publi
 -- Forfaits d'abonnements officiels KONDU
 INSERT INTO public.subscription_plans (code, name, description, price_cfa, duration_days, is_vip, features)
 VALUES 
-    ('daily_200', 'Pass 24H Essentiel', 'Accès illimité aux courses pendant 24 heures. 0% de commission.', 200, 1, false, '["Accès illimité aux demandes", "0% commission KONDU", "GPS en temps réel", "Support standard"]'::jsonb),
-    ('daily_300', 'Pass 24H Confort', 'Accès 24H avec support prioritaire et alertes instantanées.', 300, 1, false, '["Accès illimité aux demandes", "0% commission", "Alertes haute fréquence", "Support prioritaire"]'::jsonb),
-    ('weekly', 'Pass Hebdomadaire (7 Jours)', 'Formule 7 jours économique pour chauffeurs réguliers.', 1500, 7, false, '["Validité 7 jours entiers", "0% commission sur toutes les courses", "Statut Chauffeur Vérifié", "Historique complet"]'::jsonb),
-    ('monthly', 'Pass Mensuel Pro (30 Jours)', 'Formule mensuelle pour une tranquillité totale.', 5000, 30, false, '["Validité 30 jours", "0% commission", "Badge Chauffeur Pro", "Assistance prioritaire"]'::jsonb),
-    ('vip_monthly', 'KONDU VIP (30 Jours)', 'Priorité absolue de matching et visibilité maximale sur la carte.', 5000, 30, true, '["Priorité n°1 dans le matching", "Badge exclusif KONDU VIP Doré", "Visibilité maximale sur la carte", "Support dédié WhatsApp 24/7"]'::jsonb)
-ON CONFLICT (code) DO NOTHING;
+    ('daily_200', 'Pass 24H Essentiel', 'Accès illimité aux courses pendant 24 heures. 0% de commission.', 500, 1, false, '["Courses illimitées pendant 24h", "0% commission KONDU", "GPS en temps réel", "Support standard Lomé"]'::jsonb),
+    ('daily_300', 'Pass 24H Confort', 'Accès 24H avec visibilité prioritaire et alertes instantanées.', 1000, 1, false, '["Courses illimitées pendant 24h", "0% commission", "Visibilité prioritaire passagers", "Support prioritaire"]'::jsonb),
+    ('weekly', 'Pass Hebdomadaire (7 Jours)', 'Formule 7 jours ultra-rentable pour chauffeurs réguliers.', 2500, 7, false, '["Validité 7 jours entiers", "0% commission sur toutes les courses", "Statut Chauffeur Vérifié", "Économique : ~357 F/jour"]'::jsonb),
+    ('monthly', 'Pass Mensuel Pro (30 Jours)', 'Formule mensuelle pour une sérénité totale des chauffeurs professionnels.', 8000, 30, false, '["Validité 30 jours complets", "0% commission", "Badge Chauffeur Pro", "Assistance dédiée 7j/7"]'::jsonb),
+    ('vip_monthly', 'KONDU VIP (30 Jours)', 'Statut prestige n°1 : Priorité absolue de matching et badge KONDU VIP doré.', 15000, 30, true, '["Priorité n°1 dans le matching", "Badge exclusif KONDU VIP Doré", "Visibilité maximale sur la carte", "Support dédié WhatsApp 24/7"]'::jsonb)
+ON CONFLICT (code) DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    price_cfa = EXCLUDED.price_cfa,
+    features = EXCLUDED.features;
 
 -- Paramètres système par défaut
 INSERT INTO public.system_settings (key, value, description)

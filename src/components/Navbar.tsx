@@ -42,43 +42,45 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
           {/* Logo KONDU */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
               <Compass className="w-6 h-6 text-slate-950 stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-black tracking-tight text-white">KONDU</span>
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                <span className="text-2xl font-black tracking-tight text-slate-900">KONDU</span>
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
               </div>
-              <p className="text-[10px] tracking-wider uppercase text-amber-400 font-semibold">Mobilité & Services</p>
+              <p className="text-[10px] tracking-wider uppercase text-amber-600 font-bold">Mobilité & Services</p>
             </div>
           </Link>
 
           {/* Navigation Desktop */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/#services" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors">
+          <nav className="hidden md:flex items-center gap-5">
+            <a href="/#services" className="text-sm font-semibold text-slate-700 hover:text-amber-600 transition-colors">
               Nos Services
+            </a>
+            <a href="/#news" className="text-sm font-semibold text-slate-700 hover:text-amber-600 transition-colors">
+              Actualités
+            </a>
+            <a href="/#contact" className="text-sm font-semibold text-slate-700 hover:text-amber-600 transition-colors">
+              Nous contacter
+            </a>
+            <a href="/#pro" className="text-sm font-semibold text-slate-700 hover:text-amber-600 transition-colors flex items-center gap-1.5">
+              <Car className="w-4 h-4 text-amber-500" />
+              Espace Chauffeur
+            </a>
+            <Link to="/shop" className="text-sm font-bold text-amber-700 hover:text-amber-800 transition-colors flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+              <Crown className="w-4 h-4 text-amber-500 fill-amber-500/30" />
+              Boutique
             </Link>
-            <Link to="/#pro" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1.5">
-              <Car className="w-4 h-4 text-amber-400" />
-              Espace Chauffeur (0% Commission)
-            </Link>
-            <Link to="/#business" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1.5">
-              <Building2 className="w-4 h-4 text-sky-400" />
-              Entreprises
-            </Link>
-            <Link to="/#vip" className="text-sm font-bold text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
-              <Crown className="w-4 h-4 text-amber-400 fill-amber-400/30" />
-              KONDU VIP
-            </Link>
-            <Link to="/support" className="text-sm font-semibold text-slate-200 hover:text-amber-400 transition-colors flex items-center gap-1">
-              <HelpCircle className="w-4 h-4 text-amber-400" />
+            <Link to="/support" className="text-sm font-semibold text-slate-700 hover:text-amber-600 transition-colors flex items-center gap-1">
+              <HelpCircle className="w-4 h-4 text-amber-500" />
               Support
             </Link>
           </nav>
@@ -89,16 +91,16 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Link
                   to={getDashboardRouteForRole(role)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium border border-slate-700 transition-all hover:border-amber-500/50 shadow-md"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-sm font-bold border border-slate-200 transition-all shadow-sm"
                 >
-                  <LayoutDashboard className="w-4 h-4 text-amber-400" />
+                  <LayoutDashboard className="w-4 h-4 text-amber-500" />
                   <span>Mon Espace</span>
                   {getRoleBadge()}
                 </Link>
                 <button
                   onClick={handleSignOut}
                   title="Se déconnecter"
-                  className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/40 transition-colors"
+                  className="p-2.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -107,14 +109,14 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-200 hover:text-white hover:bg-slate-800/80 text-sm font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-sm font-bold transition-colors"
                 >
-                  <LogIn className="w-4 h-4 text-amber-400" />
+                  <LogIn className="w-4 h-4 text-amber-500" />
                   Connexion
                 </Link>
                 <Link
                   to="/register"
-                  className="gold-gradient-btn px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-amber-500/20"
+                  className="gold-gradient-btn px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md shadow-amber-500/20"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   S'inscrire
@@ -128,14 +130,14 @@ export const Navbar: React.FC = () => {
             {user && (
               <Link
                 to={getDashboardRouteForRole(role)}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold"
+                className="px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-700 text-xs font-semibold"
               >
                 Dashboard
               </Link>
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+              className="p-2 rounded-lg bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -143,52 +145,73 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Menu Déroulant Mobile */}
+      {/* Menu Déroulant Mobile Optimisé Smartphone & Android */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-950/95 border-b border-slate-800 px-4 pt-3 pb-6 space-y-3">
+        <div className="md:hidden bg-white/98 backdrop-blur-xl border-b border-slate-200 px-4 pt-3 pb-6 space-y-2 text-slate-900 shadow-xl animate-fade-up">
           <Link
             to="/#services"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-300 hover:text-amber-400 font-medium text-sm"
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm"
           >
-            Nos Services
+            Nos Services de Mobilité
           </Link>
           <Link
             to="/#pro"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-300 hover:text-amber-400 font-medium text-sm flex items-center gap-2"
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm flex items-center gap-2"
           >
-            <Car className="w-4 h-4 text-amber-400" /> Espace Chauffeur (0% Commission)
+            <Car className="w-4 h-4 text-amber-500" /> Espace Chauffeur (0% Commission)
           </Link>
           <Link
             to="/#business"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-300 hover:text-amber-400 font-medium text-sm flex items-center gap-2"
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm flex items-center gap-2"
           >
-            <Building2 className="w-4 h-4 text-blue-400" /> Entreprises & Commerçants
+            <Building2 className="w-4 h-4 text-blue-500" /> Entreprises & Commerçants
+          </Link>
+          <a
+            href="/#news"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm"
+          >
+            📰 Actualités KONDU
+          </a>
+          <a
+            href="/#contact"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm"
+          >
+            📞 Nous contacter
+          </a>
+          <Link
+            to="/#pro"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2.5 rounded-xl bg-amber-50 text-amber-900 font-bold text-sm flex items-center gap-2 border border-amber-200"
+          >
+            <Crown className="w-4 h-4 text-amber-600" /> KONDU VIP (15 000 F / mois)
           </Link>
           <Link
-            to="/#vip"
+            to="/shop"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-amber-300 hover:text-amber-200 font-medium text-sm flex items-center gap-2"
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-amber-600 font-bold text-sm flex items-center gap-2"
           >
-            <Crown className="w-4 h-4 text-amber-400" /> KONDU VIP (5 000 F/mois)
+            🛍️ Boutique KONDU
           </Link>
           <Link
             to="/support"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-slate-300 hover:text-amber-400 font-medium text-sm flex items-center gap-2"
+            className="block px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-700 hover:text-amber-600 font-bold text-sm flex items-center gap-2"
           >
             <HelpCircle className="w-4 h-4 text-slate-400" /> Centre d'Aide & Support
           </Link>
 
-          <div className="pt-3 border-t border-slate-800 space-y-2">
+          <div className="pt-3 border-t border-slate-100 space-y-2">
             {user ? (
               <>
                 <Link
                   to={getDashboardRouteForRole(role)}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-500 text-slate-950 font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-amber-500 text-slate-950 font-extrabold text-sm shadow-sm"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   Accéder à mon Dashboard ({profile?.full_name || role})
@@ -198,7 +221,7 @@ export const Navbar: React.FC = () => {
                     setMobileMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 text-sm font-semibold"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-red-50 text-red-600 border border-red-200 text-sm font-bold"
                 >
                   <LogOut className="w-4 h-4" />
                   Déconnexion
@@ -209,15 +232,15 @@ export const Navbar: React.FC = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-medium"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-100 text-slate-900 text-sm font-bold border border-slate-200"
                 >
-                  <LogIn className="w-4 h-4 text-amber-400" />
+                  <LogIn className="w-4 h-4 text-amber-500" />
                   Connexion
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="gold-gradient-btn flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold"
+                  className="gold-gradient-btn flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-extrabold text-slate-950 shadow-sm"
                 >
                   S'inscrire
                 </Link>

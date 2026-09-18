@@ -170,12 +170,24 @@ export const RegisterPage: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const formatTogolesePlate = (raw: string): string => {
+    let cleaned = raw.trim().toUpperCase();
+    if (!cleaned) return '';
+    if (!cleaned.startsWith('TG')) {
+      cleaned = `TG ${cleaned}`;
+    }
+    return cleaned;
+  };
+
   const validateStep2 = (): boolean => {
     const errors: Record<string, string> = {};
 
     if (role === 'PROVIDER') {
       if (!vehicleBrand.trim()) errors.vehicleBrand = 'Marque du véhicule requise';
-      if (!vehiclePlate.trim() || vehiclePlate.trim().length < 4) errors.vehiclePlate = 'Plaque d\'immatriculation invalide';
+      const formattedPlate = formatTogolesePlate(vehiclePlate);
+      if (!formattedPlate || formattedPlate.length < 5) {
+        errors.vehiclePlate = 'Plaque togolaise invalide (ex: TG 1234 AB ou TG-1234-AB)';
+      }
     }
     if (role === 'BUSINESS') {
       if (!companyName.trim() || companyName.trim().length < 2) errors.companyName = 'Nom de l\'entreprise requis';
@@ -215,7 +227,7 @@ export const RegisterPage: React.FC = () => {
         metaData.service_type = serviceType;
         metaData.vehicle_brand = vehicleBrand.trim();
         metaData.vehicle_model = vehicleModel.trim() || 'Standard';
-        metaData.vehicle_plate = vehiclePlate.trim().toUpperCase();
+        metaData.vehicle_plate = formatTogolesePlate(vehiclePlate);
       } else if (role === 'BUSINESS') {
         metaData.company_name = companyName.trim();
         metaData.registration_number = registrationNumber.trim() || null;
@@ -269,7 +281,7 @@ export const RegisterPage: React.FC = () => {
                 service_type: serviceType,
                 vehicle_brand: vehicleBrand.trim(),
                 vehicle_model: vehicleModel.trim() || 'Standard',
-                vehicle_plate: vehiclePlate.trim().toUpperCase(),
+                vehicle_plate: formatTogolesePlate(vehiclePlate),
                 subscription_status: 'pending',
                 is_online: false,
               }, { onConflict: 'user_id' });
@@ -474,7 +486,7 @@ export const RegisterPage: React.FC = () => {
                     label="Téléphone (Appels)"
                     type="tel"
                     value={phone}
-                    onChange={setPhone}
+                    onChange={(val) => setPhone(val.replace(/[^0-9+\s()-]/g, ''))}
                     placeholder="+228 99 25 52 31"
                     icon={Phone}
                     error={fieldErrors.phone}
@@ -484,7 +496,7 @@ export const RegisterPage: React.FC = () => {
                     label="WhatsApp Direct"
                     type="tel"
                     value={whatsapp}
-                    onChange={setWhatsapp}
+                    onChange={(val) => setWhatsapp(val.replace(/[^0-9+\s()-]/g, ''))}
                     placeholder="+228 93 91 92 12"
                     icon={MessageSquare}
                     required={false}

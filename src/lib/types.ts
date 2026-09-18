@@ -175,3 +175,67 @@ export interface SystemSettings {
   gps_freshness_minutes: { minutes: number };
   base_fares: Record<ServiceType, number>;
 }
+
+export const OFFICIAL_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  {
+    id: 'plan_daily_essentiel_500',
+    code: 'daily_essentiel_500',
+    name: 'Pass 24H Essentiel',
+    description: 'Accès Chauffeur Pro actif 24h avec courses illimitées. 0% de commission.',
+    price_cfa: 500,
+    duration_days: 1,
+    is_vip: false,
+    features: ['Courses illimitées pendant 24h', '0% commission KONDU', 'Visibilité GPS en direct', 'Support standard Lomé'],
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'plan_daily_confort_1000',
+    code: 'daily_confort_1000',
+    name: 'Pass 24H Confort',
+    description: 'Accès 24H avec visibilité prioritaire et alertes sonores instantanées.',
+    price_cfa: 1000,
+    duration_days: 1,
+    is_vip: false,
+    features: ['Courses illimitées 24h', '0% commission', 'Visibilité prioritaire passagers', 'Support réactif prioritaire'],
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'plan_weekly_2500',
+    code: 'weekly_2500',
+    name: 'Pass Hebdomadaire (7 Jours)',
+    description: 'Formule 7 jours ultra-rentable pour chauffeurs actifs et réguliers.',
+    price_cfa: 2500,
+    duration_days: 7,
+    is_vip: false,
+    features: ['Accès illimité 7 jours complets', '0% commission sur toutes les courses', 'Badge Chauffeur Actif', 'Économique (~357 F/jour)'],
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'plan_monthly_8000',
+    code: 'monthly_8000',
+    name: 'Pass Mensuel Pro (30 Jours)',
+    description: 'Formule mensuelle pour une sérénité totale des chauffeurs professionnels.',
+    price_cfa: 8000,
+    duration_days: 30,
+    is_vip: false,
+    features: ['Validité 30 jours complets', '0% commission KONDU', 'Badge Chauffeur Pro Certifié', 'Assistance prioritaire 7j/7'],
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'plan_vip_15000',
+    code: 'vip_15000',
+    name: 'KONDU VIP (30 Jours)',
+    description: 'Statut prestige n°1 : Priorité absolue de matching et badge KONDU VIP doré.',
+    price_cfa: 15000,
+    duration_days: 30,
+    is_vip: true,
+    features: ['Priorité n°1 dans le matching', 'Badge exclusif KONDU VIP Doré', 'Visibilité maximale sur la carte', 'Accès direct aux clients VIP & Entreprises', 'Support dédié WhatsApp 24/7'],
+    is_active: true,
+    created_at: new Date().toISOString()
+  }
+];
+

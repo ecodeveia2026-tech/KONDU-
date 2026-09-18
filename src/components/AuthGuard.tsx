@@ -55,10 +55,15 @@ export const RoleRoute: React.FC<RoleRouteProps> = ({ children, allowedRoles }) 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 2. Si des rôles spécifiques sont requis et que l'utilisateur n'a pas le bon rôle
-  if (allowedRoles && allowedRoles.length > 0 && role) {
+  // 2. Si le rôle est en cours de synchronisation
+  if (!role) {
+    return <LoadingScreen message="Vérification de vos permissions de rôle..." />;
+  }
+
+  // 3. Sécurité étanche : Vérification stricte des rôles autorisés
+  if (allowedRoles && allowedRoles.length > 0) {
     if (!allowedRoles.includes(role)) {
-      // Redirection automatique vers le dashboard propre à son rôle
+      // Redirection immédiate vers le dashboard réservé à son rôle réel
       return <Navigate to={getDashboardRouteForRole(role)} replace />;
     }
   }
@@ -74,9 +79,12 @@ export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ child
     return <LoadingScreen message="Chargement..." />;
   }
 
-  // Si l'utilisateur est déjà connecté, on l'envoie directement à son Dashboard !
-  if (user && role) {
-    return <Navigate to={getDashboardRouteForRole(role)} replace />;
+  // Si l'utilisateur est connecté, on l'envoie obligatoirement vers son Dashboard par rôle
+  if (user) {
+    if (role) {
+      return <Navigate to={getDashboardRouteForRole(role)} replace />;
+    }
+    return <LoadingScreen message="Redirection vers votre tableau de bord..." />;
   }
 
   return <>{children}</>;

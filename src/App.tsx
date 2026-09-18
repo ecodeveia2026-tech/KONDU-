@@ -11,6 +11,7 @@ import { ProviderDashboard } from './pages/provider/ProviderDashboard';
 import { BusinessDashboard } from './pages/business/BusinessDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { SupportPage } from './pages/SupportPage';
+import { ShopPage } from './pages/ShopPage';
 
 export function App() {
   return (
@@ -80,6 +81,9 @@ export function App() {
 
           {/* 7. Page Support & Assistance */}
           <Route path="/support" element={<SupportPage />} />
+
+          {/* 8. Boutique Publique */}
+          <Route path="/shop" element={<ShopPage />} />
 
           {/* 8. Redirection par défaut vers l'accueil */}
           <Route path="*" element={<Navigate to="/" replace />} />

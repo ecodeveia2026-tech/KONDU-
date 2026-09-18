@@ -43,27 +43,29 @@ class OrderService {
    * Recherche en temps réel des chauffeurs disponibles et proches via RPC Supabase
    */
   public async getNearbyAvailableProviders(
-    serviceType: ServiceType,
-    clientLat: number,
-    clientLng: number,
-    maxRadiusKm: number = 15.0
+    serviceType?: ServiceType | 'all',
+    clientLat: number = 6.1375,
+    clientLng: number = 1.2123,
+    maxRadiusKm: number = 30.0
   ): Promise<NearbyProviderResult[]> {
     try {
-      // 1. Appel prioritaire de la fonction RPC officielle PostgreSQL
-      const { data, error } = await supabase.rpc('get_nearby_available_providers', {
-        p_service_type: serviceType,
-        p_client_lat: clientLat,
-        p_client_lng: clientLng,
-        p_max_radius_km: maxRadiusKm,
-        p_max_age_minutes: 30,
-      });
+      // 1. Appel prioritaire de la fonction RPC officielle PostgreSQL si service précis
+      if (serviceType && serviceType !== 'all') {
+        const { data, error } = await supabase.rpc('get_nearby_available_providers', {
+          p_service_type: serviceType,
+          p_client_lat: clientLat,
+          p_client_lng: clientLng,
+          p_max_radius_km: maxRadiusKm,
+          p_max_age_minutes: 60,
+        });
 
-      if (!error && Array.isArray(data) && data.length > 0) {
-        return data as NearbyProviderResult[];
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data as NearbyProviderResult[];
+        }
       }
 
-      // 2. Fallback sécurisé en requête directe si la fonction RPC n'est pas accessible
-      const { data: directData, error: directErr } = await supabase
+      // 2. Requête directe flexible si fallback ou si serviceType === 'all'
+      let query = supabase
         .from('provider_profiles')
         .select(`
           user_id,
@@ -80,9 +82,14 @@ class OrderService {
         `)
         .eq('is_online', true)
         .eq('is_available', true)
-        .eq('service_type', serviceType)
         .not('current_lat', 'is', null)
         .not('current_lng', 'is', null);
+
+      if (serviceType && serviceType !== 'all') {
+        query = query.eq('service_type', serviceType);
+      }
+
+      const { data: directData, error: directErr } = await query;
 
       if (directErr || !directData) return [];
 
@@ -103,7 +110,9 @@ class OrderService {
             service_type: item.service_type,
             vehicle_brand: item.vehicle_brand,
             vehicle_model: item.vehicle_model,
-            vehicle_plate: item.vehicle_plate,
+            vehicle_plate: item.vehicle_plate
+              ? (item.vehicle_plate.toUpperCase().startsWith('TG') ? item.vehicle_plate.toUpperCase() : `TG ${item.vehicle_plate.toUpperCase()}`)
+              : 'TG 1234 AB',
             is_vip: Boolean(item.is_vip),
             rating_avg: Number(item.rating_avg || 5.0),
             total_ratings: Number(item.total_ratings || 0),
@@ -305,7 +314,7 @@ class OrderService {
   /**
    * Calcul Haversine en kilomètres
    */
-  private calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  public calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371; // Rayon de la terre en km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;

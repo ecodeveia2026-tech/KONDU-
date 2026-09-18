@@ -174,12 +174,8 @@ class LocationService {
         })
         .eq('user_id', userId);
 
-      await supabase.from('driver_locations').insert({
-        provider_id: userId,
-        latitude: 0,
-        longitude: 0,
-        is_online: false,
-      });
+      // On ne crée plus de fausse position (0,0) dans driver_locations
+      // pour indiquer le passage hors ligne, afin de ne pas fausser l'historique GPS.
     } catch (e) {
       console.error('[LocationService] Erreur passage Hors Ligne:', e);
     }
