@@ -27,7 +27,10 @@ export const LoginPage: React.FC = () => {
       });
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
+          throw new Error('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+        } else if (error.message.includes('Invalid login credentials')) {
           throw new Error('Adresse e-mail ou mot de passe incorrect.');
         } else if (error.message.includes('Email not confirmed')) {
           throw new Error('Veuillez confirmer votre adresse e-mail avant de vous connecter.');
@@ -63,7 +66,12 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Erreur de connexion:', err);
-      setErrorMsg(err.message || 'Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+      const rawMsg = (err?.message || String(err || '')).toLowerCase();
+      if (rawMsg.includes('failed to fetch') || rawMsg.includes('network') || rawMsg.includes('load failed')) {
+        setErrorMsg('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+      } else {
+        setErrorMsg(err.message || 'Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+      }
     } finally {
       setIsSubmitting(false);
     }

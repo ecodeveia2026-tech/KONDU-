@@ -243,7 +243,9 @@ export const RegisterPage: React.FC = () => {
 
       if (error) {
         const msg = error.message.toLowerCase();
-        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+        if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
+          throw new Error('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+        } else if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
           throw new Error('Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter.');
         } else if (msg.includes('rate limit') || msg.includes('too many')) {
           throw new Error('Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.');
@@ -308,7 +310,12 @@ export const RegisterPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Erreur inscription KONDU:', err);
-      setErrorMsg(err.message || 'Une erreur inattendue s\'est produite. Veuillez réessayer.');
+      const rawMsg = (err?.message || String(err || '')).toLowerCase();
+      if (rawMsg.includes('failed to fetch') || rawMsg.includes('network') || rawMsg.includes('load failed')) {
+        setErrorMsg('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+      } else {
+        setErrorMsg(err.message || 'Une erreur inattendue s\'est produite. Veuillez réessayer.');
+      }
     } finally {
       setIsSubmitting(false);
     }
