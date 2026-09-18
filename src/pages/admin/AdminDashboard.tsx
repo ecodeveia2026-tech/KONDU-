@@ -237,7 +237,7 @@ export const AdminDashboard: React.FC = () => {
       // 3. Commandes récentes
       const { data: ordData } = await supabase
         .from('orders')
-        .select('*, client:profiles(*)')
+        .select('*, client:profiles!orders_client_id_fkey(*)')
         .order('created_at', { ascending: false })
         .limit(25);
 

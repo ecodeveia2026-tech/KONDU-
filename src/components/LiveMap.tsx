@@ -140,6 +140,7 @@ interface LiveMapProps {
   onLocationSelect?: (lat: number, lng: number) => void;
   className?: string;
   showLocalityMarkers?: boolean;
+  onSelectDriver?: (provider: ProviderProfile) => void;
 }
 
 export const LiveMap: React.FC<LiveMapProps> = ({
@@ -153,6 +154,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   dropoffAddress,
   className = 'h-[500px] w-full rounded-3xl overflow-hidden',
   showLocalityMarkers = true,
+  onSelectDriver,
 }) => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([centerLat, centerLng]);
   const [mapZoom, setMapZoom] = useState<number>(zoom);
@@ -351,6 +353,16 @@ export const LiveMap: React.FC<LiveMapProps> = ({
                         </a>
                       )}
                     </div>
+
+                    {onSelectDriver && (
+                      <button
+                        type="button"
+                        onClick={() => onSelectDriver(prov)}
+                        className="w-full mt-2 py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition"
+                      >
+                        <Navigation className="w-3.5 h-3.5" /> Choisir ce chauffeur
+                      </button>
+                    )}
                   </div>
                 </Popup>
               </Marker>

@@ -34,7 +34,8 @@ import {
   Clock,
   Radio,
   Check,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 
 export const ClientDashboard: React.FC = () => {
@@ -61,6 +62,8 @@ export const ClientDashboard: React.FC = () => {
   const [filterSortBy, setFilterSortBy] = useState<'distance' | 'rating'>('distance');
   const [showDriverList, setShowDriverList] = useState<boolean>(true);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+  const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
+  const [showDirectOrderModal, setShowDirectOrderModal] = useState<boolean>(false);
 
   // Formulaire de commande (pré-sélectionné si passé dans l'URL)
   const [serviceType, setServiceType] = useState<ServiceType>(urlService || 'moto');
@@ -214,22 +217,58 @@ export const ClientDashboard: React.FC = () => {
       });
   }, [nearbyProviders, clientLat, clientLng, filterRadiusKm, filterServiceType, filterVipOnly, filterFavoritesOnly, filterSearchQuery, filterSortBy, favoriteProviderIds]);
 
+  // Enrichissement sécurisé des données du chauffeur assigné à la commande
+  const enrichOrderWithProvider = useCallback(async (order: any): Promise<Order> => {
+    if (!order) return order;
+    if (!order.provider_id) {
+      return { ...order, provider: undefined } as Order;
+    }
+    try {
+      const { data: provData } = await supabase
+        .from('provider_profiles')
+        .select('*, profile:profiles(*)')
+        .eq('user_id', order.provider_id)
+        .maybeSingle();
+
+      if (provData) {
+        const prof = Array.isArray(provData.profile) ? provData.profile[0] : provData.profile;
+        return {
+          ...order,
+          provider: {
+            ...provData,
+            profile: prof,
+            full_name: prof?.full_name || 'Chauffeur Partenaire',
+            phone: prof?.phone,
+            whatsapp: prof?.whatsapp || prof?.phone,
+            avatar_url: prof?.avatar_url || prof?.photo_url,
+          },
+        } as Order;
+      }
+    } catch (e) {
+      console.warn('Erreur enrichissement chauffeur:', e);
+    }
+    return order as Order;
+  }, []);
+
   // Chargement de la commande active et de l'historique
   const loadOrders = useCallback(async () => {
     if (!user) return;
     try {
-      // 1. Commande active non terminée
+      // 1. Commande active non terminée (sans relation inexistante dans le schema cache)
       const { data: activeData, error: activeErr } = await supabase
         .from('orders')
-        .select('*, provider:provider_profiles(*, profile:profiles(*))')
+        .select('*, client:profiles!orders_client_id_fkey(*)')
         .eq('client_id', user.id)
         .in('status', ['created', 'searching', 'accepted', 'arriving', 'in_progress'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (!activeErr) {
-        setActiveOrder((activeData as Order) || null);
+      if (activeData) {
+        const enriched = await enrichOrderWithProvider(activeData);
+        setActiveOrder(enriched);
+      } else if (!activeErr) {
+        setActiveOrder(null);
       }
 
       // 2. Historique des courses terminées
@@ -247,7 +286,7 @@ export const ClientDashboard: React.FC = () => {
     } catch (err) {
       console.error('Erreur chargement commandes:', err);
     }
-  }, [user]);
+  }, [user, enrichOrderWithProvider]);
 
   // Initialisation et écoute GPS Realtime des chauffeurs à proximité
   useEffect(() => {
@@ -330,34 +369,51 @@ export const ClientDashboard: React.FC = () => {
     try {
       const estimatedPrice = calculateEstimatedFare();
 
+      // Enregistrement officiel de la course avec chauffeur ciblé si choisi
       const { data, error } = await supabase
         .from('orders')
         .insert({
           client_id: user.id,
+          provider_id: selectedDriverId || null,
           service_type: serviceType,
           status: 'searching',
-          pickup_address: pickupAddress || 'Position GPS',
+          pickup_address: pickupAddress || 'Position actuelle (GPS Lomé)',
+          pickup_latitude: clientLat,
+          pickup_longitude: clientLng,
           pickup_lat: clientLat,
           pickup_lng: clientLng,
+          destination_address: dropoffAddress.trim(),
+          destination_latitude: clientLat + 0.02,
+          destination_longitude: clientLng + 0.02,
           dropoff_address: dropoffAddress.trim(),
-          dropoff_lat: clientLat + 0.02, // Coordonnée estimée
+          dropoff_lat: clientLat + 0.02,
           dropoff_lng: clientLng + 0.02,
+          estimated_distance_km: 5.0,
           estimated_price: estimatedPrice,
           currency: 'XOF',
           notes: notes.trim() || null,
         })
-        .select('*, provider:provider_profiles(*, profile:profiles(*))')
+        .select('*, client:profiles!orders_client_id_fkey(*)')
         .single();
 
       if (error) throw error;
 
-      setActiveOrder(data as Order);
-      setDropoffAddress('');
-      setNotes('');
-      confetti({ particleCount: 50, spread: 50 });
+      if (data) {
+        const enriched = await enrichOrderWithProvider(data);
+        setActiveOrder(enriched);
+        setDropoffAddress('');
+        setNotes('');
+        setShowDirectOrderModal(false);
+        confetti({ particleCount: 50, spread: 50 });
+      }
     } catch (err: any) {
       console.error('Erreur création commande:', err);
-      alert('Impossible d\'enregistrer la demande: ' + (err.message || 'Erreur réseau'));
+      const rawMsg = err.message || '';
+      if (rawMsg.includes('schema cache') || rawMsg.includes('relationship')) {
+        alert('Erreur de synchronisation du réseau. Veuillez réessayer dans un instant.');
+      } else {
+        alert('Impossible d\'enregistrer la demande: ' + (err.message || 'Erreur réseau'));
+      }
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -668,10 +724,63 @@ export const ClientDashboard: React.FC = () => {
           {/* Colonne Gauche : Formulaire de Commande */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Navigation className="w-5 h-5 text-amber-600" />
-                Commander un transport
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Navigation className="w-5 h-5 text-amber-600" />
+                  Commander un transport
+                </h2>
+                {selectedDriver && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDriverId(null);
+                      setSelectedDriver(null);
+                    }}
+                    className="text-[11px] font-bold text-slate-500 hover:text-red-600 flex items-center gap-0.5 transition"
+                  >
+                    <X className="w-3.5 h-3.5" /> Réinitialiser
+                  </button>
+                )}
+              </div>
+
+              {/* Encart Chauffeur Spécifique Sélectionné */}
+              {selectedDriver && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/15 to-orange-500/10 border-2 border-amber-400 shadow-sm space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black text-amber-900 flex items-center gap-1.5 uppercase tracking-wider">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      Course ciblée avec ce chauffeur
+                    </span>
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 shadow-xs">
+                      À ~{selectedDriver.calculatedDurationMinutes || 2} min
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-amber-200 border border-amber-300 flex items-center justify-center font-black text-amber-900 text-sm overflow-hidden shrink-0">
+                      {selectedDriver.profile?.avatar_url ? (
+                        <img src={selectedDriver.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        selectedDriver.profile?.full_name?.charAt(0) || 'C'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-black text-slate-900 truncate">
+                          {selectedDriver.profile?.full_name || 'Chauffeur Partenaire'}
+                        </h4>
+                        {selectedDriver.is_vip && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                            VIP
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-600">
+                        {selectedDriver.vehicle_brand} {selectedDriver.vehicle_model} • <strong className="font-mono text-slate-900">{selectedDriver.vehicle_plate}</strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Sélection du véhicule */}
               <div>
@@ -1127,22 +1236,24 @@ export const ClientDashboard: React.FC = () => {
                             type="button"
                             onClick={() => {
                               setSelectedDriverId(driver.user_id);
+                              setSelectedDriver(driver);
                               setServiceType(driver.service_type);
-                              confetti({ particleCount: 35, spread: 50 });
+                              setShowDirectOrderModal(true);
+                              confetti({ particleCount: 40, spread: 60 });
                             }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 transition ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm ${
                               isSelected
-                                ? 'bg-emerald-600 text-white shadow-sm'
-                                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-2xs'
+                                ? 'bg-emerald-600 text-white shadow-emerald-500/20'
+                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 hover:scale-[1.02]'
                             }`}
                           >
                             {isSelected ? (
                               <>
-                                <Check className="w-3.5 h-3.5" /> Chauffeur Choisi
+                                <Check className="w-3.5 h-3.5 stroke-[3]" /> Chauffeur Choisi
                               </>
                             ) : (
                               <>
-                                <Navigation className="w-3 h-3" /> Choisir ce chauffeur
+                                <Navigation className="w-3.5 h-3.5" /> Choisir ce chauffeur
                               </>
                             )}
                           </button>
@@ -1170,6 +1281,13 @@ export const ClientDashboard: React.FC = () => {
                 centerLng={clientLng}
                 zoom={14}
                 providers={filteredAndSortedProviders}
+                onSelectDriver={(prov) => {
+                  setSelectedDriverId(prov.user_id);
+                  setSelectedDriver(prov);
+                  setServiceType(prov.service_type);
+                  setShowDirectOrderModal(true);
+                  confetti({ particleCount: 35, spread: 50 });
+                }}
                 className="h-[480px] w-full rounded-2xl border border-slate-200 shadow-sm"
               />
             </div>
@@ -1269,6 +1387,164 @@ export const ClientDashboard: React.FC = () => {
                 Envoyer ma note
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE COMMANDE DIRECTE AVEC LE CHAUFFEUR CHOISI --- */}
+      {showDirectOrderModal && selectedDriver && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 relative my-8">
+            <button
+              onClick={() => setShowDirectOrderModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* En-tête du chauffeur sélectionné */}
+            <div className="flex items-center gap-4 border-b border-slate-100 pb-4 mb-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center font-black text-xl text-amber-900 overflow-hidden shrink-0 shadow-sm">
+                {selectedDriver.profile?.avatar_url ? (
+                  <img src={selectedDriver.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  selectedDriver.profile?.full_name?.charAt(0) || 'C'
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-slate-900 truncate">
+                    {selectedDriver.profile?.full_name || 'Chauffeur Partenaire'}
+                  </h3>
+                  {selectedDriver.is_vip && (
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-0.5">
+                      <Crown className="w-3 h-3 text-amber-600" /> VIP
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  {selectedDriver.vehicle_brand} {selectedDriver.vehicle_model} • Plaque: <strong className="font-mono text-slate-900">{selectedDriver.vehicle_plate}</strong>
+                </p>
+                <div className="flex items-center gap-3 mt-1 text-xs">
+                  <span className="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md">
+                    📍 À ~{selectedDriver.calculatedDistanceKm ? (selectedDriver.calculatedDistanceKm < 1 ? `${Math.round(selectedDriver.calculatedDistanceKm * 1000)} m` : `${selectedDriver.calculatedDistanceKm.toFixed(1)} km`) : 'proximité'} (~{selectedDriver.calculatedDurationMinutes || 2} min)
+                  </span>
+                  <span className="text-emerald-700 font-bold">
+                    ⭐ {(selectedDriver.rating_avg || 5.0).toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulaire de validation de la course */}
+            <form onSubmit={handleCreateOrder} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Point de ramassage
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={pickupAddress}
+                  onChange={(e) => setPickupAddress(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-red-600" /> Où allez-vous ? (Destination)
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={dropoffAddress}
+                  onChange={(e) => setDropoffAddress(e.target.value)}
+                  placeholder="Ex: Assigamé, Aéroport ou Carrefour Déckon"
+                  className="w-full bg-slate-50 border-2 border-amber-400/80 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-500 shadow-sm"
+                />
+
+                {/* Suggestions express Lomé */}
+                <div className="mt-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Repères populaires à Lomé (1 clic) :
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      'Aéroport Int. Gnassingbé Eyadéma',
+                      'Grand Marché (Assigamé)',
+                      'Carrefour Déckon',
+                      'Agoè Assiyéyé',
+                      'Université de Lomé (Campus)',
+                      'Bè Plage',
+                      'Port Autonome de Lomé',
+                    ].map((place) => (
+                      <button
+                        key={place}
+                        type="button"
+                        onClick={() => setDropoffAddress(place)}
+                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 hover:text-amber-900 text-slate-700 text-[10px] font-semibold transition"
+                      >
+                        {place}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Note ou repère supplémentaire (Optionnel)
+                </label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Ex: Devant la pharmacie, tee-shirt bleu"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Récapitulatif tarif */}
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-amber-800 block">Tarif Estimé Course Directe</span>
+                  <span className="text-xl font-black text-amber-600">{calculateEstimatedFare()} F CFA</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-emerald-700 font-extrabold block">0% Commission</span>
+                  <span className="text-[10px] text-slate-500">Paiement direct chauffeur</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDirectOrderModal(false)}
+                  className="px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingOrder}
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 py-3.5 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition disabled:opacity-50"
+                >
+                  {isSubmittingOrder ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Transmission de la course...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="w-4 h-4" />
+                      <span>Envoyer la course à ce chauffeur</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

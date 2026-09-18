@@ -8,6 +8,7 @@ import type { ServiceType } from '../types';
 
 export interface CreateOrderParams {
   clientId: string;
+  providerId?: string;
   serviceType: ServiceType;
   pickupAddress: string;
   pickupLat: number;
@@ -141,6 +142,7 @@ class OrderService {
         .from('orders')
         .insert({
           client_id: params.clientId,
+          provider_id: params.providerId || null,
           service_type: params.serviceType,
           status: 'searching',
           pickup_address: params.pickupAddress,

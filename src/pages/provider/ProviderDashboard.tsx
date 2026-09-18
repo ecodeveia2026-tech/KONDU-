@@ -219,7 +219,7 @@ export const ProviderDashboard: React.FC = () => {
       // 1. Commande acceptée en cours par ce chauffeur
       const { data: currentOrder } = await supabase
         .from('orders')
-        .select('*, client:profiles(*)')
+        .select('*, client:profiles!orders_client_id_fkey(*)')
         .eq('provider_id', user.id)
         .in('status', ['accepted', 'arriving', 'in_progress'])
         .maybeSingle();
@@ -229,13 +229,14 @@ export const ProviderDashboard: React.FC = () => {
       } else {
         setActiveOrder(null);
 
-        // 2. Commandes disponibles en recherche
+        // 2. Commandes disponibles en recherche (générales OU adressées spécifiquement à ce chauffeur)
         const { data: searchingOrders } = await supabase
           .from('orders')
-          .select('*, client:profiles(*)')
+          .select('*, client:profiles!orders_client_id_fkey(*)')
+          .or(`provider_id.is.null,provider_id.eq.${user.id}`)
           .eq('status', 'searching')
           .order('created_at', { ascending: false })
-          .limit(5);
+          .limit(8);
 
         if (searchingOrders) {
           setAvailableOrders(searchingOrders as Order[]);
@@ -292,7 +293,7 @@ export const ProviderDashboard: React.FC = () => {
           })
           .eq('id', orderId)
           .eq('status', 'searching')
-          .select('*, client:profiles(*)')
+          .select('*, client:profiles!orders_client_id_fkey(*)')
           .single();
 
         if (updateErr) {
@@ -597,21 +598,43 @@ export const ProviderDashboard: React.FC = () => {
               {availableOrders.map((ord) => (
                 <div
                   key={ord.id}
-                  className="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-amber-400 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className={`p-5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    ord.provider_id === user?.id
+                      ? 'bg-gradient-to-r from-amber-500/10 via-amber-500/15 to-orange-500/10 border-2 border-amber-400 shadow-md'
+                      : 'bg-slate-50 border-slate-200 hover:border-amber-400'
+                  }`}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-slate-900 text-sm capitalize">{ord.service_type}</span>
+                      {ord.provider_id === user?.id && (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs animate-pulse">
+                          ⚡ Course Directe (Spécialement pour vous)
+                        </span>
+                      )}
                       <span className="text-[10px] text-slate-500">
                         {new Date(ord.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
+
+                    {ord.client?.full_name && (
+                      <p className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                        <span>Passager :</span> <span className="text-amber-700">{ord.client.full_name}</span>
+                        {ord.client.phone && <span className="text-slate-500 font-normal">({ord.client.phone})</span>}
+                      </p>
+                    )}
+
                     <p className="text-xs text-slate-700">
                       <strong>Départ :</strong> {ord.pickup_address}
                     </p>
                     <p className="text-xs text-slate-700">
                       <strong>Arrivée :</strong> {ord.dropoff_address}
                     </p>
+                    {ord.notes && (
+                      <p className="text-[11px] text-slate-500 italic">
+                        Note passager : "{ord.notes}"
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4">
