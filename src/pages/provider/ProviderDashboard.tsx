@@ -534,12 +534,12 @@ export const ProviderDashboard: React.FC = () => {
             </div>
 
             {/* GPRS Navigation Ultra-Pro */}
-            <div className="mt-4 rounded-2xl overflow-hidden border border-amber-300 shadow-lg">
+            <div className="mt-4">
               <DriverTrackingMap
                 driverLat={providerProfile?.current_lat ?? null}
                 driverLng={providerProfile?.current_lng ?? null}
-                pickupLat={activeOrder.pickup_lat}
-                pickupLng={activeOrder.pickup_lng}
+                pickupLat={activeOrder.pickup_lat ?? null}
+                pickupLng={activeOrder.pickup_lng ?? null}
                 pickupAddress={activeOrder.pickup_address}
                 dropoffLat={activeOrder.dropoff_lat ?? null}
                 dropoffLng={activeOrder.dropoff_lng ?? null}
