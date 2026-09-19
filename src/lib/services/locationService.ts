@@ -1,6 +1,6 @@
 // ==============================================================================
-// KONDU - SERVICE OFFICIEL DE GÉOLOCALISATION RÉELLE & SUIVI GPS
-// Conforme aux règles KONDU : pas de simulation, coordonnées réelles avec précision
+// ŋdzemɔ - SERVICE OFFICIEL DE GÉOLOCALISATION RÉELLE & SUIVI GPS
+// Conforme aux règles ŋdzemɔ : pas de simulation, coordonnées réelles avec précision
 // ==============================================================================
 
 import { supabase } from '../supabase';

@@ -244,7 +244,7 @@ export const RegisterPage: React.FC = () => {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
-          throw new Error('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+          throw new Error('Connexion au serveur ŋdzemɔ impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
         } else if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
           throw new Error('Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter.');
         } else if (msg.includes('rate limit') || msg.includes('too many')) {
@@ -309,10 +309,10 @@ export const RegisterPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      console.error('Erreur inscription KONDU:', err);
+      console.error('Erreur inscription ŋdzemɔ:', err);
       const rawMsg = (err?.message || String(err || '')).toLowerCase();
       if (rawMsg.includes('failed to fetch') || rawMsg.includes('network') || rawMsg.includes('load failed')) {
-        setErrorMsg('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+        setErrorMsg('Connexion au serveur ŋdzemɔ impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
       } else {
         setErrorMsg(err.message || 'Une erreur inattendue s\'est produite. Veuillez réessayer.');
       }
@@ -349,7 +349,7 @@ export const RegisterPage: React.FC = () => {
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
-                <span>Cliquez sur le lien de confirmation envoyé par KONDU.</span>
+                <span>Cliquez sur le lien de confirmation envoyé par ŋdzemɔ.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
@@ -380,10 +380,7 @@ export const RegisterPage: React.FC = () => {
       {/* En-tête avec logo & localisation officielle */}
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10 text-center mb-6">
         <Link to="/" className="inline-flex items-center justify-center gap-3 group mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
-            <Compass className="w-7 h-7 text-slate-950 stroke-[2.5]" />
-          </div>
-          <span className="text-3xl font-black text-white tracking-tight">KONDU</span>
+          <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-14 w-auto group-hover:scale-105 transition-transform" />
         </Link>
 
         {/* Badge de localisation officielle */}
@@ -393,7 +390,7 @@ export const RegisterPage: React.FC = () => {
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-black text-white">
-          Rejoindre le réseau KONDU
+          Rejoindre le réseau ŋdzemɔ
         </h1>
         <p className="mt-1.5 text-sm text-slate-400">
           Sélectionnez votre type de compte pour démarrer
@@ -741,7 +738,7 @@ export const RegisterPage: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
                   <div className="flex items-center gap-2 text-blue-400 text-xs font-bold mb-1.5">
                     <CheckCircle2 className="w-4 h-4" />
-                    Avantages Compte Entreprise KONDU
+                    Avantages Compte Entreprise ŋdzemɔ
                   </div>
                   <p className="text-slate-300 text-xs leading-relaxed">
                     Plateforme centralisée pour commander des transports et livraisons avec facturation mensuelle et suivi GPS en temps réel.
@@ -761,7 +758,7 @@ export const RegisterPage: React.FC = () => {
                   {isSubmitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /><span>Création de votre compte...</span></>
                   ) : (
-                    <><ShieldCheck className="w-4 h-4" /><span>Créer mon compte KONDU</span></>
+                    <><ShieldCheck className="w-4 h-4" /><span>Créer mon compte ŋdzemɔ</span></>
                   )}
                 </button>
               )}
@@ -817,7 +814,7 @@ export const RegisterPage: React.FC = () => {
             <div className="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/20 shadow-lg">
               <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-800">
                 <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" /> Siège KONDU — Lomé, Togo
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" /> Siège ŋdzemɔ — Lomé, Togo
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   Support Direct

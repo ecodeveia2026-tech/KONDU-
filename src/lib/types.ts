@@ -1,5 +1,5 @@
 // ==============================================================================
-// KONDU - TYPES TYPESCRIPT COMPLETS
+// ŋdzemɔ - TYPES TYPESCRIPT COMPLETS
 // ==============================================================================
 
 export type UserRole = 'CLIENT' | 'PROVIDER' | 'BUSINESS' | 'ADMIN';
@@ -185,7 +185,7 @@ export const OFFICIAL_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price_cfa: 500,
     duration_days: 1,
     is_vip: false,
-    features: ['Courses illimitées pendant 24h', '0% commission KONDU', 'Visibilité GPS en direct', 'Support standard Lomé'],
+    features: ['Courses illimitées pendant 24h', '0% commission ŋdzemɔ', 'Visibilité GPS en direct', 'Support standard Lomé'],
     is_active: true,
     created_at: new Date().toISOString()
   },
@@ -221,19 +221,19 @@ export const OFFICIAL_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price_cfa: 8000,
     duration_days: 30,
     is_vip: false,
-    features: ['Validité 30 jours complets', '0% commission KONDU', 'Badge Chauffeur Pro Certifié', 'Assistance prioritaire 7j/7'],
+    features: ['Validité 30 jours complets', '0% commission ŋdzemɔ', 'Badge Chauffeur Pro Certifié', 'Assistance prioritaire 7j/7'],
     is_active: true,
     created_at: new Date().toISOString()
   },
   {
     id: 'plan_vip_15000',
     code: 'vip_15000',
-    name: 'KONDU VIP (30 Jours)',
-    description: 'Statut prestige n°1 : Priorité absolue de matching et badge KONDU VIP doré.',
+    name: 'ŋdzemɔ VIP (30 Jours)',
+    description: 'Statut prestige n°1 : Priorité absolue de matching et badge ŋdzemɔ VIP doré.',
     price_cfa: 15000,
     duration_days: 30,
     is_vip: true,
-    features: ['Priorité n°1 dans le matching', 'Badge exclusif KONDU VIP Doré', 'Visibilité maximale sur la carte', 'Accès direct aux clients VIP & Entreprises', 'Support dédié WhatsApp 24/7'],
+    features: ['Priorité n°1 dans le matching', 'Badge exclusif ŋdzemɔ VIP Doré', 'Visibilité maximale sur la carte', 'Accès direct aux clients VIP & Entreprises', 'Support dédié WhatsApp 24/7'],
     is_active: true,
     created_at: new Date().toISOString()
   }

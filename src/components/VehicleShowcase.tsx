@@ -77,7 +77,7 @@ const VEHICLES: VehicleCardProps[] = [
   },
   {
     id: 'vip',
-    name: 'KONDU VIP Berline',
+    name: 'ŋdzemɔ VIP Berline',
     category: 'Chauffeur Privé & Affaires',
     description: 'Véhicule haut standing avec chauffeur en tenue, discrétion assurée et matching prioritaire immédiat.',
     baseFare: 'Dès 2 500 F CFA',
@@ -109,7 +109,7 @@ const VEHICLES: VehicleCardProps[] = [
     id: 'delivery',
     name: 'Transport Marchandises Pro',
     category: 'Commerçants & Entreprises',
-    description: 'Expéditions quotidiennes et distribution de stock pour boutiques et commerçants KONDU BUSINESS.',
+    description: 'Expéditions quotidiennes et distribution de stock pour boutiques et commerçants ŋdzemɔ BUSINESS.',
     baseFare: 'Sur Devis / Direct',
     capacity: 'Grand Volume',
     speed: 'Express Pro',

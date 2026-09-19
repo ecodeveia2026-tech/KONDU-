@@ -154,7 +154,7 @@ export const ShopPage: React.FC = () => {
               <ShoppingBag className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Boutique KONDU</h1>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Boutique ŋdzemɔ</h1>
               <p className="text-slate-500">Commandez nos produits officiels directement en ligne.</p>
             </div>
           </div>

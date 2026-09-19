@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Configuration officielle KONDU Togo
+// Configuration officielle ŋdzemɔ Togo
 const DEFAULT_SUPABASE_URL = 'https://aiufvthczqelhljrqmxz.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpdWZ2dGhjenFlbGhsanJxbXh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMDUwNTMsImV4cCI6MjEwNDg4MTA1M30.3cIPafTNwdjvOtVE0TwgMf2CVS0FXTaS3Mh1P4gbV94';
@@ -44,7 +44,7 @@ const getSafeStorage = () => {
   };
 };
 
-// Initialisation du client Supabase officiel KONDU
+// Initialisation du client Supabase officiel ŋdzemɔ
 export const supabase = createClient(
   supabaseUrl,
   supabaseAnonKey,

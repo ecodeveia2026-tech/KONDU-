@@ -11,10 +11,7 @@ export const Footer: React.FC = () => {
           {/* Colonne 1 : Présentation & Identité */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <Compass className="w-5 h-5 text-slate-950 stroke-[2.5]" />
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight">KONDU</span>
+              <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-11 w-auto" />
             </Link>
             
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
@@ -124,7 +121,7 @@ export const Footer: React.FC = () => {
 
         {/* Ligne inférieure de copyright */}
         <div className="mt-12 pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} KONDU Togo. Tous droits réservés. Modèle équitable à 0% de commission.</p>
+          <p>© {new Date().getFullYear()} ŋdzemɔ Togo. Tous droits réservés. Modèle équitable à 0% de commission.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1 text-slate-400">
               Conçu avec excellence <Heart className="w-3 h-3 text-red-500 fill-red-500" /> à Lomé, Togo

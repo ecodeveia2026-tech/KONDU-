@@ -29,7 +29,7 @@ export const LoginPage: React.FC = () => {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
-          throw new Error('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+          throw new Error('Connexion au serveur ŋdzemɔ impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
         } else if (error.message.includes('Invalid login credentials')) {
           throw new Error('Adresse e-mail ou mot de passe incorrect.');
         } else if (error.message.includes('Email not confirmed')) {
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
       console.error('Erreur de connexion:', err);
       const rawMsg = (err?.message || String(err || '')).toLowerCase();
       if (rawMsg.includes('failed to fetch') || rawMsg.includes('network') || rawMsg.includes('load failed')) {
-        setErrorMsg('Connexion au serveur KONDU impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
+        setErrorMsg('Connexion au serveur ŋdzemɔ impossible. Vérifiez votre connexion Internet (données mobiles ou Wi-Fi) puis réessayez.');
       } else {
         setErrorMsg(err.message || 'Une erreur est survenue lors de la connexion. Veuillez réessayer.');
       }
@@ -85,10 +85,7 @@ export const LoginPage: React.FC = () => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 text-center">
         <Link to="/" className="inline-flex items-center justify-center gap-3 mb-4 group">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-            <Compass className="w-7 h-7 text-slate-950 stroke-[2.5]" />
-          </div>
-          <span className="text-3xl font-black text-slate-900 tracking-tight">KONDU</span>
+          <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-14 w-auto group-hover:scale-105 transition-transform" />
         </Link>
 
         {/* Badge Lomé Togo */}
@@ -185,7 +182,7 @@ export const LoginPage: React.FC = () => {
             <p className="text-xs text-slate-500">
               Vous n'avez pas encore de compte ?{' '}
               <Link to="/register" className="text-amber-600 font-bold hover:underline hover:text-amber-700 inline-flex items-center gap-1 transition-colors">
-                Créer un compte KONDU <ArrowRight className="w-3 h-3" />
+                Créer un compte ŋdzemɔ <ArrowRight className="w-3 h-3" />
               </Link>
             </p>
           </div>

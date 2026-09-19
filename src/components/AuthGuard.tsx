@@ -25,14 +25,14 @@ export const getDashboardRouteForRole = (role: UserRole | null | undefined): str
 };
 
 // Écran de chargement moderne
-export const LoadingScreen: React.FC<{ message?: string }> = ({ message = 'Synchronisation sécurisée KONDU...' }) => (
+export const LoadingScreen: React.FC<{ message?: string }> = ({ message = 'Synchronisation sécurisée ŋdzemɔ...' }) => (
   <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white">
     <div className="relative flex items-center justify-center mb-6">
       <div className="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
       <div className="absolute w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 animate-pulse"></div>
     </div>
     <h2 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-yellow-200 bg-clip-text text-transparent">
-      KONDU
+      ŋdzemɔ
     </h2>
     <p className="text-slate-400 text-sm mt-2 flex items-center gap-2">
       <Loader2 className="w-4 h-4 animate-spin text-amber-400" />

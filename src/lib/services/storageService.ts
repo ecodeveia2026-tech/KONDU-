@@ -1,6 +1,6 @@
 // ==============================================================================
-// KONDU - SERVICE OFFICIEL SUPABASE STORAGE (PHOTOS DE PROFIL & DOCUMENTS)
-// Conforme aux règles KONDU : isolation des comptes, sécurité, fallback DataURL
+// ŋdzemɔ - SERVICE OFFICIEL SUPABASE STORAGE (PHOTOS DE PROFIL & DOCUMENTS)
+// Conforme aux règles ŋdzemɔ : isolation des comptes, sécurité, fallback DataURL
 // ==============================================================================
 
 import { supabase } from '../supabase';

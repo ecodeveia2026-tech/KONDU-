@@ -1,17 +1,23 @@
 /**
- * KONDU - DriverTrackingMap
- * Carte GPRS ultra-professionnelle dédiée aux chauffeurs.
- * - Hauteur fixe en px pour garantir le rendu Leaflet sur mobile
- * - Aucun overflow:hidden sur les conteneurs parents (bug Leaflet)
- * - invalidateSize() au montage pour forcer le calcul des tuiles
- * - Fallback sur Lomé si les coordonnées sont manquantes
+ * ŋdzemɔ - DriverTrackingMap
+ * Carte GPRS ultra-professionnelle pour le chauffeur.
+ *
+ * Logique de navigation par statut :
+ *   PROVIDER_ACCEPTED / ARRIVING  →  Chauffeur → Client (point A)
+ *   IN_PROGRESS                   →  Chauffeur → Destination (point B)
+ *
+ * Fixes :
+ *   - Aucun overflow:hidden sur les parents (bug Leaflet)
+ *   - invalidateSize() après montage pour mobile
+ *   - Coordonnées nullable avec fallback Lomé
+ *   - Hauteur fixe en px garantie
  */
 import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-/* ===== Icônes ===== */
+/* ─── Icônes ─────────────────────────────────────────────────────── */
 const makeIcon = (bg: string, emoji: string, pulse = false) =>
   L.divIcon({
     className: '',
@@ -21,7 +27,7 @@ const makeIcon = (bg: string, emoji: string, pulse = false) =>
         background:${bg};
         border-radius:50%;
         border:3px solid white;
-        box-shadow:0 4px 14px rgba(0,0,0,.45);
+        box-shadow:0 4px 18px rgba(0,0,0,.45);
         display:flex;align-items:center;justify-content:center;
         font-size:20px;
       ">
@@ -29,8 +35,7 @@ const makeIcon = (bg: string, emoji: string, pulse = false) =>
       ${
         pulse
           ? `<span style="
-          position:absolute;inset:-6px;
-          border-radius:50%;
+          position:absolute;inset:-6px;border-radius:50%;
           border:2.5px solid ${bg};
           animation:kondu-ring 1.5s infinite;
           opacity:.7;
@@ -43,34 +48,36 @@ const makeIcon = (bg: string, emoji: string, pulse = false) =>
     popupAnchor: [0, -26],
   });
 
-const driverIcon   = makeIcon('#f59e0b', '🚗', true);
-const pickupIconA  = makeIcon('#10b981', 'A');
-const dropoffIconB = makeIcon('#ef4444', 'B');
+const driverIcon   = makeIcon('#f59e0b', '🚗', true);  // Chauffeur (pulsant)
+const clientIcon   = makeIcon('#10b981', '👤', true);   // Client au ramassage (A)
+const dropoffIcon  = makeIcon('#ef4444', '🏁');          // Destination (B)
 
-/* ===== Recentrage + invalidateSize (fix mobile Leaflet) ===== */
+/* ─── Contrôleur de carte : invalidateSize + recentrage ─────────── */
 const MapController: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
   const map = useMap();
   const initRef = useRef(false);
 
   useEffect(() => {
-    // Force Leaflet à recalculer la taille du conteneur
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       map.invalidateSize();
       if (!initRef.current) {
         map.setView([lat, lng], 14);
         initRef.current = true;
       }
-    }, 200);
+    }, 250);
+    return () => clearTimeout(timer);
   }, [map, lat, lng]);
 
   useEffect(() => {
-    map.setView([lat, lng], 14, { animate: true });
+    if (initRef.current) {
+      map.setView([lat, lng], 14, { animate: true });
+    }
   }, [lat, lng, map]);
 
   return null;
 };
 
-/* ===== Props ===== */
+/* ─── Props ──────────────────────────────────────────────────────── */
 export interface DriverTrackingMapProps {
   driverLat?: number | null;
   driverLng?: number | null;
@@ -85,7 +92,7 @@ export interface DriverTrackingMapProps {
   estimatedPrice?: number;
 }
 
-/* ===== Composant principal ===== */
+/* ─── Composant ──────────────────────────────────────────────────── */
 export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
   driverLat,
   driverLng,
@@ -99,38 +106,86 @@ export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
   clientName = 'Client',
   estimatedPrice,
 }) => {
-  // Lomé par défaut si aucune coordonnée disponible
+  /* Coordonnées sécurisées avec fallback Lomé */
   const LOME_LAT = 6.1375;
   const LOME_LNG = 1.2123;
 
-  const safePickupLat = (pickupLat && pickupLat !== 0) ? pickupLat : LOME_LAT;
-  const safePickupLng = (pickupLng && pickupLng !== 0) ? pickupLng : LOME_LNG;
-  const safeDriverLat = (driverLat && driverLat !== 0) ? driverLat : null;
-  const safeDriverLng = (driverLng && driverLng !== 0) ? driverLng : null;
+  const safeDriverLat  = (driverLat  && driverLat  !== 0) ? driverLat  : null;
+  const safeDriverLng  = (driverLng  && driverLng  !== 0) ? driverLng  : null;
+  const safePickupLat  = (pickupLat  && pickupLat  !== 0) ? pickupLat  : LOME_LAT;
+  const safePickupLng  = (pickupLng  && pickupLng  !== 0) ? pickupLng  : LOME_LNG;
   const safeDropoffLat = (dropoffLat && dropoffLat !== 0) ? dropoffLat : null;
   const safeDropoffLng = (dropoffLng && dropoffLng !== 0) ? dropoffLng : null;
 
-  // Centre prioritaire : chauffeur > ramassage > Lomé
+  /* ─────────────────────────────────────────────────────────────────
+     LOGIQUE DE NAVIGATION PAR STATUT
+     ─────────────────────────────────────────────────────────────────
+     PROVIDER_ACCEPTED / ARRIVING →  Chauffeur ➡ Client (pickup A)
+     IN_PROGRESS                  →  Chauffeur ➡ Destination (B)
+     Autre                        →  Chauffeur ➡ Pickup (défaut)
+  ──────────────────────────────────────────────────────────────────── */
+  const isOnWayToClient = ['PROVIDER_ACCEPTED', 'ARRIVING'].includes(orderStatus ?? '');
+  const isInProgress    = orderStatus === 'IN_PROGRESS';
+
+  // Tracé de route : toujours depuis le chauffeur
+  const routePoints: [number, number][] = [];
+  if (safeDriverLat && safeDriverLng) {
+    routePoints.push([safeDriverLat, safeDriverLng]);
+  }
+
+  if (isInProgress && safeDropoffLat && safeDropoffLng) {
+    // Client à bord → aller à la destination
+    routePoints.push([safeDropoffLat, safeDropoffLng]);
+  } else {
+    // En route vers le client → aller au ramassage
+    routePoints.push([safePickupLat, safePickupLng]);
+    // Afficher également la destination au fond (grisé)
+    if (safeDropoffLat && safeDropoffLng) {
+      // On ne l'ajoute PAS au tracé principal, juste comme marqueur informatif
+    }
+  }
+
+  /* Centre de la carte : position du chauffeur en priorité */
   const centerLat = safeDriverLat ?? safePickupLat;
   const centerLng = safeDriverLng ?? safePickupLng;
 
-  // Tracé de la route
-  const routePoints: [number, number][] = [];
-  if (safeDriverLat && safeDriverLng) routePoints.push([safeDriverLat, safeDriverLng]);
-  routePoints.push([safePickupLat, safePickupLng]);
-  if (safeDropoffLat && safeDropoffLng) routePoints.push([safeDropoffLat, safeDropoffLng]);
-
-  const statusConfig: Record<string, { label: string; color: string }> = {
-    PROVIDER_ACCEPTED: { label: '🚗 En route vers le client', color: '#f59e0b' },
-    ARRIVING:          { label: '📍 Arrivé au point de ramassage', color: '#3b82f6' },
-    IN_PROGRESS:       { label: '▶️ Course en cours', color: '#10b981' },
-    COMPLETED:         { label: '✅ Course terminée', color: '#6b7280' },
+  /* Statut et instructions vocales */
+  type StatusInfo = { label: string; instruction: string; color: string; target: string };
+  const statusConfig: Record<string, StatusInfo> = {
+    PROVIDER_ACCEPTED: {
+      label: '🚗 En route vers le client',
+      instruction: `Rejoindre ${clientName} au point de ramassage`,
+      color: '#f59e0b',
+      target: 'pickup',
+    },
+    ARRIVING: {
+      label: '📍 Arrivé au ramassage',
+      instruction: `Attendez ${clientName} — Vous êtes au point de collecte`,
+      color: '#3b82f6',
+      target: 'pickup',
+    },
+    IN_PROGRESS: {
+      label: '▶️ Course en cours',
+      instruction: `En route vers la destination`,
+      color: '#10b981',
+      target: 'dropoff',
+    },
+    COMPLETED: {
+      label: '✅ Course terminée',
+      instruction: 'Merci pour cette course !',
+      color: '#6b7280',
+      target: 'none',
+    },
   };
-  const status = statusConfig[orderStatus ?? ''] ?? { label: orderStatus, color: '#6b7280' };
+  const st: StatusInfo = statusConfig[orderStatus ?? ''] ?? {
+    label: orderStatus ?? '',
+    instruction: '',
+    color: '#6b7280',
+    target: 'pickup',
+  };
 
   return (
     <>
-      {/* CSS global pour l'animation et Leaflet */}
       <style>{`
         @keyframes kondu-ring {
           0%   { transform: scale(1);    opacity: .75; }
@@ -141,9 +196,7 @@ export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
           font-family: inherit !important;
           border-radius: 0 0 14px 14px;
         }
-        .kondu-tracking-map .leaflet-control-attribution {
-          font-size: 9px !important;
-        }
+        .kondu-tracking-map .leaflet-control-attribution { font-size: 9px !important; }
       `}</style>
 
       <div
@@ -151,38 +204,49 @@ export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
         style={{
           width: '100%',
           borderRadius: 16,
-          border: '2px solid #f59e0b',
-          boxShadow: '0 4px 24px rgba(0,0,0,.15)',
+          border: `2px solid ${st.color}`,
+          boxShadow: '0 6px 28px rgba(0,0,0,.18)',
           background: '#0f172a',
-          /* PAS de overflow:hidden ici — ça bloquerait Leaflet */
+          /* PAS de overflow:hidden → laisserait Leaflet s'afficher correctement */
         }}
       >
-        {/* ── Bandeau statut ── */}
+        {/* ── En-tête statut ── */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
           padding: '10px 16px',
           background: '#0f172a',
           borderRadius: '14px 14px 0 0',
-          color: '#f8fafc',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
         }}>
-          <span style={{ fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              width: 9, height: 9, borderRadius: '50%',
-              background: status.color, display: 'inline-block',
-              boxShadow: `0 0 6px ${status.color}`,
-            }} />
-            {status.label}
-          </span>
-          <span style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace' }}>
-            {safeDriverLat
-              ? `GPS: ${safeDriverLat.toFixed(4)}, ${safeDriverLng?.toFixed(4)}`
-              : '📡 GPS en attente…'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 9, height: 9, borderRadius: '50%',
+                background: st.color,
+                display: 'inline-block',
+                boxShadow: `0 0 8px ${st.color}`,
+              }} />
+              {st.label}
+            </span>
+            <span style={{ fontSize: 10, color: '#94a3b8', fontFamily: 'monospace' }}>
+              {safeDriverLat
+                ? `GPS: ${safeDriverLat.toFixed(4)}, ${safeDriverLng?.toFixed(4)}`
+                : '📡 GPS en attente…'}
+            </span>
+          </div>
+          {/* Instruction de navigation */}
+          <div style={{
+            fontSize: 11, color: st.color, fontWeight: 700,
+            display: 'flex', alignItems: 'center', gap: 6,
+            paddingLeft: 18,
+          }}>
+            <span>→</span>
+            <span>{st.instruction}</span>
+          </div>
         </div>
 
-        {/* ── Carte Leaflet ── hauteur FIXE en px ── */}
+        {/* ── Carte Leaflet (hauteur fixe px) ── */}
         <div style={{ height: 320, width: '100%' }}>
           <MapContainer
             center={[centerLat, centerLng]}
@@ -199,7 +263,7 @@ export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
 
             <MapController lat={centerLat} lng={centerLng} />
 
-            {/* 🚗 Chauffeur */}
+            {/* 🚗 Position du Chauffeur */}
             {safeDriverLat && safeDriverLng && (
               <Marker position={[safeDriverLat, safeDriverLng]} icon={driverIcon}>
                 <Popup>
@@ -211,53 +275,82 @@ export const DriverTrackingMap: React.FC<DriverTrackingMapProps> = ({
               </Marker>
             )}
 
-            {/* A — Ramassage */}
-            <Marker position={[safePickupLat, safePickupLng]} icon={pickupIconA}>
+            {/* 👤 Position du Client (point A – ramassage) */}
+            {/* Toujours affiché pour que le chauffeur sache où aller */}
+            <Marker position={[safePickupLat, safePickupLng]} icon={clientIcon}>
               <Popup>
-                <strong style={{ color: '#059669' }}>📍 Point A – Ramassage</strong><br />
-                <span style={{ fontSize: 11 }}>{pickupAddress}</span><br />
-                <span style={{ fontSize: 11, color: '#6b7280' }}>Client : {clientName}</span>
+                <strong style={{ color: '#059669' }}>
+                  {isOnWayToClient ? '👤 Client – Point de collecte' : '✅ Ramassage effectué'}
+                </strong><br />
+                <span style={{ fontSize: 11 }}><strong>{clientName}</strong></span><br />
+                <span style={{ fontSize: 11, color: '#6b7280' }}>{pickupAddress}</span>
               </Popup>
             </Marker>
 
-            {/* B — Destination */}
+            {/* 🏁 Destination (point B) – toujours visible comme info */}
             {safeDropoffLat && safeDropoffLng && (
-              <Marker position={[safeDropoffLat, safeDropoffLng]} icon={dropoffIconB}>
+              <Marker position={[safeDropoffLat, safeDropoffLng]} icon={dropoffIcon}>
                 <Popup>
-                  <strong style={{ color: '#dc2626' }}>🏁 Point B – Destination</strong><br />
+                  <strong style={{ color: '#dc2626' }}>🏁 Destination finale</strong><br />
                   <span style={{ fontSize: 11 }}>{dropoffAddress}</span>
                   {estimatedPrice && (
-                    <><br /><strong style={{ color: '#d97706', fontSize: 13 }}>{estimatedPrice} F CFA</strong></>
+                    <><br /><strong style={{ color: '#d97706', fontSize: 13 }}>
+                      {estimatedPrice} F CFA
+                    </strong></>
                   )}
                 </Popup>
               </Marker>
             )}
 
-            {/* Tracé itinéraire */}
+            {/* ══ TRACÉ PRINCIPAL : Chauffeur → Cible active ══ */}
             {routePoints.length >= 2 && (
               <>
-                <Polyline positions={routePoints} color="#92400e" weight={10} opacity={0.15} />
-                <Polyline positions={routePoints} color="#f59e0b" weight={5} opacity={0.9} dashArray="0" />
+                {/* Halo */}
+                <Polyline
+                  positions={routePoints}
+                  color={isInProgress ? '#065f46' : '#92400e'}
+                  weight={10}
+                  opacity={0.18}
+                />
+                {/* Ligne principale */}
+                <Polyline
+                  positions={routePoints}
+                  color={isInProgress ? '#10b981' : '#f59e0b'}
+                  weight={5}
+                  opacity={0.95}
+                />
               </>
+            )}
+
+            {/* Tracé secondaire grisé : Ramassage → Destination (contexte) */}
+            {!isInProgress && safePickupLat && safeDropoffLat && safeDropoffLng && (
+              <Polyline
+                positions={[
+                  [safePickupLat, safePickupLng],
+                  [safeDropoffLat, safeDropoffLng],
+                ]}
+                color="#94a3b8"
+                weight={3}
+                opacity={0.45}
+                dashArray="5, 8"
+              />
             )}
           </MapContainer>
         </div>
 
         {/* ── Légende ── */}
         <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
+          display: 'flex', flexWrap: 'wrap', gap: 10,
           padding: '8px 16px',
           background: '#1e293b',
           borderRadius: '0 0 14px 14px',
-          fontSize: 11,
-          color: '#cbd5e1',
-          alignItems: 'center',
+          fontSize: 11, color: '#cbd5e1', alignItems: 'center',
         }}>
           {safeDriverLat && <span>🚗 <strong style={{ color: '#fbbf24' }}>Vous</strong></span>}
-          <span>🟢 <strong>A</strong> Ramassage</span>
-          {safeDropoffLat && <span>🔴 <strong>B</strong> Destination</span>}
+          <span>👤 <strong style={{ color: '#34d399' }}>Client</strong> – {pickupAddress}</span>
+          {safeDropoffLat && (
+            <span>🏁 <strong style={{ color: '#f87171' }}>Destination</strong> – {dropoffAddress}</span>
+          )}
           {estimatedPrice && (
             <span style={{ marginLeft: 'auto', fontWeight: 800, color: '#fbbf24', fontSize: 13 }}>
               {estimatedPrice} F CFA

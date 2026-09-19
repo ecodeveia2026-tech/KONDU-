@@ -904,7 +904,7 @@ export const ClientDashboard: React.FC = () => {
                     <span className="text-xl font-extrabold text-amber-600">{calculateEstimatedFare()} F CFA</span>
                   </div>
                   <div className="text-right text-[10px] text-emerald-600 font-bold">
-                    0 F Commission KONDU
+                    0 F Commission ŋdzemɔ
                   </div>
                 </div>
 

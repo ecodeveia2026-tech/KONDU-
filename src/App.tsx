@@ -49,7 +49,7 @@ export function App() {
             }
           />
 
-          {/* 4. Dashboard Chauffeur / KONDU PRO */}
+          {/* 4. Dashboard Chauffeur / ŋdzemɔ PRO */}
           <Route
             path="/dashboard/provider"
             element={
@@ -59,7 +59,7 @@ export function App() {
             }
           />
 
-          {/* 5. Dashboard Entreprise / KONDU BUSINESS */}
+          {/* 5. Dashboard Entreprise / ŋdzemɔ BUSINESS */}
           <Route
             path="/dashboard/business"
             element={

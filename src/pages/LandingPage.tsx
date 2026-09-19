@@ -25,7 +25,7 @@ const PhoneMockup: React.FC = () => (
 
       {/* ── GOOGLE MAPS EMBED (Lomé, Togo) ── */}
       <iframe
-        title="KONDU Google Maps Lomé Togo"
+        title="ŋdzemɔ Google Maps Lomé Togo"
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63467.43343360408!2d1.185671!3d6.172504!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1023e1c113185419%3A0x3224b5422caf411d!2sLom%C3%A9%2C%20Togo!5e0!3m2!1sfr!2stg!4v1710000000000!5m2!1sfr!2stg"
         style={{
           position: 'absolute',
@@ -41,22 +41,16 @@ const PhoneMockup: React.FC = () => (
         allowFullScreen
       />
 
-      {/* En-tête app KONDU coloré */}
+      {/* En-tête app ŋdzemɔ coloré */}
       <div className="phone-app-header" style={{ zIndex: 10 }}>
-        <div style={{
-          width: 24, height: 24, borderRadius: 8, marginRight: 7,
-          background: 'linear-gradient(135deg, #f59e0b 0%, #0ea5e9 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <Compass style={{ width: 14, height: 14, color: 'white' }} />
-        </div>
+        <img src="/logo-ndzemo.png" alt="ŋdzemɔ" style={{ height: 24, width: 'auto', borderRadius: 6, marginRight: 7 }} />
         <span style={{
           fontWeight: 900, fontSize: 14,
           background: 'linear-gradient(135deg, #f59e0b, #0ea5e9)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
-        }}>KONDU</span>
+        }}>ŋdzemɔ</span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', animation: 'pulse-dot 1.5s ease-in-out infinite' }} />
           <span style={{ fontSize: 10, color: '#22c55e', fontWeight: 700 }}>En ligne</span>
@@ -148,23 +142,7 @@ const Navbar: React.FC<{ onOpenDownload: () => void }> = ({ onOpenDownload }) =>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 68 }}>
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 12,
-            background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #0ea5e9 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(14,165,233,0.35)'
-          }}>
-            <Compass style={{ width: 22, height: 22, color: 'white', strokeWidth: 2.5 }} />
-          </div>
-          <span style={{
-            fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px',
-            background: 'linear-gradient(135deg, #f59e0b 0%, #0ea5e9 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            KONDU
-          </span>
+          <img src="/logo-ndzemo.png" alt="ŋdzemɔ" style={{ height: 44, width: 'auto' }} />
         </Link>
 
         {/* Nav links desktop */}
@@ -412,7 +390,7 @@ export const LandingPage: React.FC = () => {
               position: 'relative'
             }}>
               <span className="kondu-gradient-title inline-flex items-center gap-3">
-                KONDU,
+                ŋdzemɔ,
                 <span className="relative inline-flex items-center justify-center">
                   <Zap className="w-10 h-10 text-amber-500 speed-icon-animated inline-block" />
                 </span>
@@ -617,7 +595,7 @@ export const LandingPage: React.FC = () => {
         }}>
           <div style={{ textAlign: 'right', maxWidth: 280 }}>
             <p style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', lineHeight: 1.4 }}>
-              Prêt à embarquer pour une aventure passionnante avec KONDU ?
+              Prêt à embarquer pour une aventure passionnante avec ŋdzemɔ ?
             </p>
             <Link
               to="/register"
@@ -735,7 +713,7 @@ export const LandingPage: React.FC = () => {
               { id: 'tricycle', image: '/images/service_tricycle_keke.jpg', title: 'Tricycle (Kéké)', desc: 'Parfait pour les petits trajets de quartier. Économique et rapide.', tag: 'Le + éco', badgeBg: '#dcfce7', badgeColor: '#15803d' },
               { id: 'vip', image: '/images/service_vip.jpg', title: 'Chauffeur VIP', desc: 'Véhicule de prestige avec chauffeur en costume. Aéroport, événements.', tag: 'Le + luxe', badgeBg: '#f3e8ff', badgeColor: '#7e22ce' },
               { id: 'moving', image: '/images/service_demenagement.jpg', title: 'Déménagement & Transport', desc: 'Camions et manutentionnaires pour déménagements et gros achats.', tag: 'Le + grand', badgeBg: '#ffedd5', badgeColor: '#c2410c' },
-              { id: 'business', image: '/images/service_business.jpg', title: 'KONDU Business', desc: 'Dashboard pro pour entreprises. Multi-commandes, facturation, rapports.', tag: 'Pour entreprises', badgeBg: '#f0f9ff', badgeColor: '#0369a1' },
+              { id: 'business', image: '/images/service_business.jpg', title: 'ŋdzemɔ Business', desc: 'Dashboard pro pour entreprises. Multi-commandes, facturation, rapports.', tag: 'Pour entreprises', badgeBg: '#f0f9ff', badgeColor: '#0369a1' },
             ].map(({ id, image, title, desc, tag, badgeBg, badgeColor }) => {
               const serviceDestination = id === 'business'
                 ? (user ? '/dashboard/business' : '/register?role=BUSINESS')
@@ -788,7 +766,7 @@ export const LandingPage: React.FC = () => {
                       }}
                       className="group-hover:text-amber-500"
                     >
-                      {id === 'business' ? 'Accéder à KONDU Business' : 'Commander ce service'} <ArrowRight style={{ width: 16, height: 16 }} />
+                      {id === 'business' ? 'Accéder à ŋdzemɔ Business' : 'Commander ce service'} <ArrowRight style={{ width: 16, height: 16 }} />
                     </Link>
                   </div>
                 </div>
@@ -812,7 +790,7 @@ export const LandingPage: React.FC = () => {
               Gagnez <span style={{ color: '#f59e0b' }}>100%</span><br />de vos courses.
             </h2>
             <p style={{ fontSize: 17, color: '#94a3b8', lineHeight: 1.7, marginBottom: 36 }}>
-              Finis les 25% de commission. Chez KONDU, payez un forfait fixe et gardez <strong style={{ color: 'white' }}>l'intégralité de vos gains</strong> sur chaque trajet.
+              Finis les 25% de commission. Chez ŋdzemɔ, payez un forfait fixe et gardez <strong style={{ color: 'white' }}>l'intégralité de vos gains</strong> sur chaque trajet.
             </p>
             {[
               'Courses illimitées avec forfait journalier dès 500 F CFA',
@@ -836,18 +814,18 @@ export const LandingPage: React.FC = () => {
               }}
             >
               <Car style={{ width: 20, height: 20 }} />
-              {user ? (role === 'PROVIDER' ? 'Mon Dashboard Chauffeur →' : 'Accéder à mon Espace →') : 'Rejoindre KONDU PRO →'}
+              {user ? (role === 'PROVIDER' ? 'Mon Dashboard Chauffeur →' : 'Accéder à mon Espace →') : 'Rejoindre ŋdzemɔ PRO →'}
             </Link>
           </div>
 
-          {/* Tarifs Officiels KONDU */}
+          {/* Tarifs Officiels ŋdzemɔ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[
-              { period: 'Pass 24H Essentiel', price: '500 F', unit: '/jour', highlight: false, features: ['Courses illimitées 24h', '0% commission KONDU', 'GPS temps réel actif'] },
+              { period: 'Pass 24H Essentiel', price: '500 F', unit: '/jour', highlight: false, features: ['Courses illimitées 24h', '0% commission ŋdzemɔ', 'GPS temps réel actif'] },
               { period: 'Pass 24H Confort', price: '1 000 F', unit: '/jour', highlight: false, features: ['Courses illimitées 24h', '0% commission', 'Visibilité prioritaire'] },
               { period: 'Pass Hebdomadaire (7 Jours)', price: '2 500 F', unit: '/semaine', highlight: true, features: ['7 jours illimités', '0% commission', 'Badge Vérifié', 'Économique : 357 F/j'] },
               { period: 'Pass Mensuel Pro (30 Jours)', price: '8 000 F', unit: '/mois', highlight: false, features: ['30 jours illimités', '0% commission', 'Support dédié 7j/7'] },
-              { period: 'KONDU VIP (30 Jours)', price: '15 000 F', unit: '/mois', highlight: true, features: ['Badge VIP Doré exclusif', 'Priorité matching n°1', 'Assistance WhatsApp 24/7'] },
+              { period: 'ŋdzemɔ VIP (30 Jours)', price: '15 000 F', unit: '/mois', highlight: true, features: ['Badge VIP Doré exclusif', 'Priorité matching n°1', 'Assistance WhatsApp 24/7'] },
             ].map(({ period, price, unit, highlight, features }) => (
               <div key={period} style={{
                 background: highlight ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
@@ -894,7 +872,7 @@ export const LandingPage: React.FC = () => {
               📰 Actualités & Médias
             </span>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, color: '#0f172a', letterSpacing: -1, marginTop: 16, marginBottom: 12 }}>
-              Dernières Informations KONDU Togo
+              Dernières Informations ŋdzemɔ Togo
             </h2>
             <p style={{ fontSize: 16, color: '#64748b', lineHeight: 1.6 }}>
               Découvrez les dernières innovations de mobilité, le déploiement du radar GPRS direct et l'expansion de nos services au Togo.
@@ -936,7 +914,7 @@ export const LandingPage: React.FC = () => {
                   FORFAIT VIP 15 000 F
                 </span>
                 <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginTop: 14, marginBottom: 10, lineHeight: 1.4 }}>
-                  Nouveau Programme KONDU VIP Togo
+                  Nouveau Programme ŋdzemɔ VIP Togo
                 </h3>
                 <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6, marginBottom: 20 }}>
                   Bénéficiez du statut VIP à 15 000 F CFA / mois pour des trajets prioritaires en berlines climatisées avec chauffeurs partenaires de prestige.
@@ -955,7 +933,7 @@ export const LandingPage: React.FC = () => {
             }}>
               <div>
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#10b981', background: '#d1fae5', padding: '4px 10px', borderRadius: 8 }}>
-                  BOUTIQUE KONDU
+                  BOUTIQUE ŋdzemɔ
                 </span>
                 <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginTop: 14, marginBottom: 10, lineHeight: 1.4 }}>
                   Ouverture de la Boutique d'Équipements Auto/Moto
@@ -1001,7 +979,7 @@ export const LandingPage: React.FC = () => {
             {/* Colonne Gauche : Coordonnées Directes */}
             <div style={{ background: 'white', borderRadius: 28, padding: 36, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
               <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', marginBottom: 24 }}>
-                Coordonnées Officielle KONDU Togo
+                Coordonnées Officielle ŋdzemɔ Togo
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -1061,7 +1039,7 @@ export const LandingPage: React.FC = () => {
 
               <form onSubmit={(e) => {
                 e.preventDefault();
-                alert(`Merci ${contactName || 'à vous'} ! Votre message a été envoyé à l'équipe KONDU Togo. Nous vous contacterons rapidement au ${contactPhone}.`);
+                alert(`Merci ${contactName || 'à vous'} ! Votre message a été envoyé à l'équipe ŋdzemɔ Togo. Nous vous contacterons rapidement au ${contactPhone}.`);
                 setContactName('');
                 setContactPhone('');
                 setContactMessage('');
@@ -1176,16 +1154,7 @@ export const LandingPage: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #0ea5e9 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(14,165,233,0.3)' }}>
-                  <Compass style={{ width: 20, height: 20, color: 'white', strokeWidth: 2.5 }} />
-                </div>
-                <span style={{
-                  fontSize: 22, fontWeight: 900,
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #0ea5e9 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>KONDU</span>
+                <img src="/logo-ndzemo.png" alt="ŋdzemɔ" style={{ height: 42, width: 'auto' }} />
               </div>
               <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6, marginBottom: 12 }}>
                 La plateforme de mobilité de référence à <strong>Lomé, Togo 🇹🇬</strong>. Transport, livraison et services avec <strong>0% de commission</strong>.
@@ -1204,7 +1173,7 @@ export const LandingPage: React.FC = () => {
             </div>
             {[
               { title: 'Services', links: ['Moto-Taxi', 'Taxi Confort', 'Tricycle', 'Berline VIP', 'Déménagement'] },
-              { title: 'Chauffeurs', links: ['Pass 24H Essentiel — 500 F', 'Pass 24H Confort — 1 000 F', 'Pass Hebdo — 2 500 F', 'Pass Mensuel — 8 000 F', 'KONDU VIP — 15 000 F'] }
+              { title: 'Chauffeurs', links: ['Pass 24H Essentiel — 500 F', 'Pass 24H Confort — 1 000 F', 'Pass Hebdo — 2 500 F', 'Pass Mensuel — 8 000 F', 'ŋdzemɔ VIP — 15 000 F'] }
             ].map(({ title, links }) => (
               <div key={title}>
                 <h4 style={{ fontSize: 13, fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>{title}</h4>
@@ -1234,7 +1203,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div style={{ borderTop: '1px solid #1e293b', paddingTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <p style={{ fontSize: 13, color: '#64748b' }}>
-              © {new Date().getFullYear()} KONDU Togo. Tous droits réservés. Modèle équitable à 0% de commission.
+              © {new Date().getFullYear()} ŋdzemɔ Togo. Tous droits réservés. Modèle équitable à 0% de commission.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <a href="https://wa.me/22893919212" target="_blank" rel="noreferrer" title="WhatsApp +228 93919212" style={{
@@ -1283,7 +1252,7 @@ export const LandingPage: React.FC = () => {
               </div>
               <div>
                 <h2 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0 }}>
-                  Charte Officielle de Bonne Conduite KONDU Togo
+                  Charte Officielle de Bonne Conduite ŋdzemɔ Togo
                 </h2>
                 <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>
                   Document Officiel d'Exploitation & de Conduite Professionnelle — Version 1.0
@@ -1295,9 +1264,9 @@ export const LandingPage: React.FC = () => {
 
             <div style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ background: '#f8fafc', padding: 16, borderRadius: 16, borderLeft: '4px solid #0ea5e9' }}>
-                <h4 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 800, color: '#0f172a' }}>1. Préambule & Esprit KONDU</h4>
+                <h4 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 800, color: '#0f172a' }}>1. Préambule & Esprit ŋdzemɔ</h4>
                 <p style={{ margin: 0, fontSize: 13 }}>
-                  La plateforme KONDU offre un modèle équitable à 0% de commission au Togo. Chaque utilisateur (Chauffeur, Client, Business) s'engage à maintenir une conduite exemplaire, respectueuse et sécurisée.
+                  La plateforme ŋdzemɔ offre un modèle équitable à 0% de commission au Togo. Chaque utilisateur (Chauffeur, Client, Business) s'engage à maintenir une conduite exemplaire, respectueuse et sécurisée.
                 </p>
               </div>
 
@@ -1323,7 +1292,7 @@ export const LandingPage: React.FC = () => {
               <div style={{ background: '#fef2f2', padding: 16, borderRadius: 16, border: '1px solid #fecaca' }}>
                 <h4 style={{ margin: '0 0 6px', fontSize: 14, fontWeight: 800, color: '#dc2626' }}>⚖️ Sanctions & Tolérance Zéro</h4>
                 <p style={{ margin: 0, fontSize: 12, color: '#991b1b' }}>
-                  Toute tentative de fraude, fausse position GPS, comportement irrespectueux ou marchandage illégal entraînera une suspension temporaire ou définitive du compte KONDU.
+                  Toute tentative de fraude, fausse position GPS, comportement irrespectueux ou marchandage illégal entraînera une suspension temporaire ou définitive du compte ŋdzemɔ.
                 </p>
               </div>
             </div>
@@ -1337,7 +1306,7 @@ export const LandingPage: React.FC = () => {
                   boxShadow: '0 4px 14px rgba(14,165,233,0.3)'
                 }}
               >
-                J'ai lu et j'accepte la Charte KONDU
+                J'ai lu et j'accepte la Charte ŋdzemɔ
               </button>
             </div>
           </div>
@@ -1377,10 +1346,10 @@ export const LandingPage: React.FC = () => {
                 <Smartphone style={{ width: 32, height: 32, color: 'white' }} />
               </div>
               <h3 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: '0 0 8px' }}>
-                Installer l'Application KONDU
+                Installer l'Application ŋdzemɔ
               </h3>
               <p style={{ fontSize: 14, color: '#64748b', margin: 0 }}>
-                Profitez de KONDU en un clic directement depuis votre écran d'accueil, sans passer par un store.
+                Profitez de ŋdzemɔ en un clic directement depuis votre écran d'accueil, sans passer par un store.
               </p>
             </div>
 
@@ -1421,7 +1390,7 @@ export const LandingPage: React.FC = () => {
         </div>
       )}
 
-      {/* Assistant IA KONDU Officiel */}
+      {/* Assistant IA ŋdzemɔ Officiel */}
       <KonduAIAssistant />
     </div>
   );

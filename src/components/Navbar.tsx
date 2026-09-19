@@ -46,18 +46,13 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo KONDU */}
+          {/* Logo ŋdzemɔ */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <Compass className="w-6 h-6 text-slate-950 stroke-[2.5]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-black tracking-tight text-slate-900">KONDU</span>
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-              </div>
-              <p className="text-[10px] tracking-wider uppercase text-amber-600 font-bold">Mobilité & Services</p>
-            </div>
+            <img
+              src="/logo-ndzemo.png"
+              alt="ŋdzemɔ"
+              className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+            />
           </Link>
 
           {/* Navigation Desktop */}

@@ -1,6 +1,6 @@
 // ==============================================================================
-// KONDU - SERVICE OFFICIEL DES COMMANDES, DU MATCHING & DES FAVORIS
-// Conforme aux règles KONDU : transactions atomiques, vraies coordonnées, RLS
+// ŋdzemɔ - SERVICE OFFICIEL DES COMMANDES, DU MATCHING & DES FAVORIS
+// Conforme aux règles ŋdzemɔ : transactions atomiques, vraies coordonnées, RLS
 // ==============================================================================
 
 import { supabase } from '../supabase';

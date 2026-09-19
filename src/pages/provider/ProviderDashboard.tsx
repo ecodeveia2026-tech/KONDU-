@@ -54,7 +54,7 @@ export const ProviderDashboard: React.FC = () => {
       const isSubActive = providerProfile?.subscription_status?.toUpperCase() === 'ACTIVE';
       if (!isSubActive) {
         setShowSubscriptionModal(true);
-        alert('Veuillez activer votre forfait KONDU (à partir de 200 F CFA) pour passer EN LIGNE et recevoir les courses des passagers.');
+        alert('Veuillez activer votre forfait ŋdzemɔ (à partir de 200 F CFA) pour passer EN LIGNE et recevoir les courses des passagers.');
         return;
       }
 
@@ -143,7 +143,7 @@ export const ProviderDashboard: React.FC = () => {
         .order('price_cfa', { ascending: true });
 
       if (data && data.length > 0) {
-        // Aligner les données avec la nouvelle grille tarifaire KONDU tout en conservant les UUID réels
+        // Aligner les données avec la nouvelle grille tarifaire ŋdzemɔ tout en conservant les UUID réels
         const mappedPlans = data.map((p) => {
           const code = (p.code || '').toLowerCase();
           const name = (p.name || '').toLowerCase();
@@ -181,11 +181,11 @@ export const ProviderDashboard: React.FC = () => {
           if (p.is_vip || code.includes('vip') || name.includes('vip')) {
             return {
               ...p,
-              name: 'KONDU VIP (30 Jours)',
+              name: 'ŋdzemɔ VIP (30 Jours)',
               price_cfa: 15000,
               duration_days: 30,
               is_vip: true,
-              description: 'Statut prestige n°1 : Priorité absolue de matching et badge KONDU VIP doré.',
+              description: 'Statut prestige n°1 : Priorité absolue de matching et badge ŋdzemɔ VIP doré.',
             };
           }
           if (code.includes('monthly') || name.includes('mensuel') || name.includes('30 jour')) {
@@ -408,7 +408,7 @@ export const ProviderDashboard: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">KONDU PRO</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">ŋdzemɔ PRO</span>
                 {providerProfile?.is_vip && (
                   <span className="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5">
                     <Crown className="w-3 h-3 text-amber-600" /> VIP DORÉ
@@ -456,7 +456,7 @@ export const ProviderDashboard: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isSubActive ? 'bg-emerald-600' : 'bg-red-600'}`}></span>
               <h3 className="font-bold text-slate-900 text-base">
-                {isSubActive ? 'Abonnement KONDU Actif' : 'Abonnement Inactif ou Expiré'}
+                {isSubActive ? 'Abonnement ŋdzemɔ Actif' : 'Abonnement Inactif ou Expiré'}
               </h3>
             </div>
             <p className="text-xs text-slate-600 max-w-xl">
@@ -688,7 +688,7 @@ export const ProviderDashboard: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-amber-600" />
-                <h3 className="font-bold text-slate-900 text-lg">Forfaits Chauffeur KONDU PRO</h3>
+                <h3 className="font-bold text-slate-900 text-lg">Forfaits Chauffeur ŋdzemɔ PRO</h3>
               </div>
               <button
                 onClick={() => setShowSubscriptionModal(false)}
@@ -735,7 +735,7 @@ export const ProviderDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Assistant IA KONDU Officiel */}
+      {/* Assistant IA ŋdzemɔ Officiel */}
       <KonduAIAssistant />
     </div>
   );

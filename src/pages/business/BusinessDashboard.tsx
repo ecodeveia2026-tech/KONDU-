@@ -239,7 +239,7 @@ export const BusinessDashboard: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">KONDU BUSINESS</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">ŋdzemɔ BUSINESS</span>
                 <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
                   Compte Entreprise
                 </span>
@@ -397,7 +397,7 @@ export const BusinessDashboard: React.FC = () => {
                     <Building2 className="w-5 h-5 text-amber-600" />
                     Catalogue Produits de l'Entreprise
                   </h3>
-                  <p className="text-xs text-slate-500">Publiez vos articles pour les rendre commandables sur KONDU Shop</p>
+                  <p className="text-xs text-slate-500">Publiez vos articles pour les rendre commandables sur ŋdzemɔ Shop</p>
                 </div>
                 <button
                   onClick={() => setShowAddProduct(true)}

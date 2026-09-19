@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC = () => {
             if (p.price_cfa !== 15000) hasOldPrices = true;
             return {
               ...p,
-              name: 'KONDU VIP (30 Jours)',
+              name: 'ŋdzemɔ VIP (30 Jours)',
               price_cfa: 15000,
               duration_days: 30,
               is_vip: true,
@@ -369,7 +369,7 @@ export const AdminDashboard: React.FC = () => {
           duration_days: 1,
           is_vip: false,
           description: 'Accès illimité aux courses pendant 24 heures. 0% de commission.',
-          features: ['Courses illimitées pendant 24h', '0% commission KONDU', 'GPS en temps réel', 'Support standard Lomé'],
+          features: ['Courses illimitées pendant 24h', '0% commission ŋdzemɔ', 'GPS en temps réel', 'Support standard Lomé'],
           is_active: true
         })
         .or('code.eq.daily_200,code.eq.daily_essentiel_500,name.ilike.%24H Essentiel%');
@@ -416,16 +416,16 @@ export const AdminDashboard: React.FC = () => {
         })
         .or('code.eq.monthly,code.eq.monthly_8000,name.ilike.%Mensuel Pro%');
 
-      // 5. KONDU VIP (30 Jours) -> 15 000 F CFA
+      // 5. ŋdzemɔ VIP (30 Jours) -> 15 000 F CFA
       await supabase
         .from('subscription_plans')
         .update({
-          name: 'KONDU VIP (30 Jours)',
+          name: 'ŋdzemɔ VIP (30 Jours)',
           price_cfa: 15000,
           duration_days: 30,
           is_vip: true,
           description: 'Priorité absolue de matching et visibilité maximale sur la carte.',
-          features: ['Priorité n°1 dans le matching', 'Badge exclusif KONDU VIP Doré', 'Visibilité maximale sur la carte', 'Support dédié WhatsApp 24/7'],
+          features: ['Priorité n°1 dans le matching', 'Badge exclusif ŋdzemɔ VIP Doré', 'Visibilité maximale sur la carte', 'Support dédié WhatsApp 24/7'],
           is_active: true
         })
         .or('code.eq.vip_monthly,code.eq.vip_15000,name.ilike.%VIP%');
@@ -642,7 +642,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="px-3 py-2 flex items-center justify-between border-b border-slate-200 pb-4">
           <div>
             <h1 className="text-xl font-black text-slate-900 tracking-wider flex items-center gap-2">
-              KONDU <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">ADMIN</span>
+              ŋdzemɔ <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">ADMIN</span>
             </h1>
             <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Tableau de bord</p>
           </div>
@@ -728,7 +728,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">KONDU ADMINISTRATION</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">ŋdzemɔ ADMINISTRATION</span>
                 <span className="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
                   Système Actif
                 </span>
@@ -745,7 +745,7 @@ export const AdminDashboard: React.FC = () => {
               className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold flex items-center gap-2 transition shadow-xs border border-amber-400"
             >
               <Home className="w-3.5 h-3.5" />
-              <span>Retour Accueil KONDU</span>
+              <span>Retour Accueil ŋdzemɔ</span>
             </Link>
             <button
               onClick={loadAdminData}
@@ -1147,7 +1147,7 @@ export const AdminDashboard: React.FC = () => {
                     <Package className="w-5 h-5 text-amber-600" />
                     Catalogue des Produits de la Boutique
                   </h3>
-                  <p className="text-xs text-slate-500">Gérez les articles disponibles à la vente en ligne sur KONDU</p>
+                  <p className="text-xs text-slate-500">Gérez les articles disponibles à la vente en ligne sur ŋdzemɔ</p>
                 </div>
                 <button 
                   onClick={() => setShowAddProductModal(true)}
@@ -1580,7 +1580,7 @@ export const AdminDashboard: React.FC = () => {
                     Marketing & Tarification VIP (15 000 F / mois)
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Grille tarifaire officielle des forfaits chauffeurs et prestataires KONDU Togo.
+                    Grille tarifaire officielle des forfaits chauffeurs et prestataires ŋdzemɔ Togo.
                   </p>
                 </div>
 
@@ -1767,7 +1767,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base font-bold text-slate-900 pb-3 border-b border-slate-100 flex items-center gap-2">
                 <Settings className="w-5 h-5 text-amber-600" />
-                Paramètres & État du Système KONDU
+                Paramètres & État du Système ŋdzemɔ
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -1781,7 +1781,7 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
                   <div className="font-bold text-slate-900 text-sm">Version de la Plateforme</div>
-                  <p className="text-slate-700">KONDU v2.5.0 Production</p>
+                  <p className="text-slate-700">ŋdzemɔ v2.5.0 Production</p>
                 </div>
               </div>
             </div>
@@ -1949,7 +1949,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Assistant IA KONDU Officiel */}
+      {/* Assistant IA ŋdzemɔ Officiel */}
       <KonduAIAssistant />
     </div>
   );

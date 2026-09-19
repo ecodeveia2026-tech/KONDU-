@@ -1,6 +1,6 @@
 // ==============================================================================
-// KONDU - SERVICE OFFICIEL DE GESTION DES PAIEMENTS & ABONNEMENTS
-// Conforme aux règles KONDU : AUCUNE SIMULATION de paiement fictif
+// ŋdzemɔ - SERVICE OFFICIEL DE GESTION DES PAIEMENTS & ABONNEMENTS
+// Conforme aux règles ŋdzemɔ : AUCUNE SIMULATION de paiement fictif
 // Les paiements doivent être validés côté serveur / webhook
 // ==============================================================================
 
@@ -35,18 +35,18 @@ class PaymentService {
   ): Promise<PaymentInitiationResult> {
     const isConfigured = this.isPaymentGatewayConfigured();
 
-    // RÈGLE STRICTE KONDU : Si l'API de paiement n'est pas configurée, NE JAMAIS SIMULER DE FAUX PAIEMENT !
+    // RÈGLE STRICTE ŋdzemɔ : Si l'API de paiement n'est pas configurée, NE JAMAIS SIMULER DE FAUX PAIEMENT !
     if (!isConfigured) {
       return {
         success: false,
         requiresExternalConfig: true,
         message:
-          'L\'intégration directe Mobile Money (T-Money / Moov Money Togo) nécessite la configuration des clés d\'API marchandes. Veuillez contacter l\'administration KONDU ou régler directement via le support officiel (+228 93919212 / +228 99255231).',
+          'L\'intégration directe Mobile Money (T-Money / Moov Money Togo) nécessite la configuration des clés d\'API marchandes. Veuillez contacter l\'administration ŋdzemɔ ou régler directement via le support officiel (+228 93919212 / +228 99255231).',
       };
     }
 
     try {
-      const transactionRef = `TX-KONDU-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      const transactionRef = `TX-ŋdzemɔ-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
       // Enregistrement de la transaction en statut PENDING dans la table payment_transactions
       const { error: txError } = await supabase.from('payment_transactions').insert({

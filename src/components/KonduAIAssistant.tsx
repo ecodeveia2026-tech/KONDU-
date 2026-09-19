@@ -22,14 +22,14 @@ export const KonduAIAssistant: React.FC = () => {
   const initialMessage: Message = {
     id: '1',
     sender: 'ai',
-    text: "Bonjour ! 👋 Je suis **KONDU AI**, votre assistant virtuel officiel. Comment puis-je vous aider aujourd'hui sur la plateforme KONDU ?",
+    text: "Bonjour ! 👋 Je suis **ŋdzemɔ AI**, votre assistant virtuel officiel. Comment puis-je vous aider aujourd'hui sur la plateforme ŋdzemɔ ?",
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     options: [
       "🚕 Quels sont les services de transport ?",
       "👑 Comment fonctionne l'abonnement VIP (15 000 F) ?",
       "📍 Comment marche le suivi GPRS / GPS temps réel ?",
       "🚗 Comment devenir Chauffeur Partenaire (0% commission) ?",
-      "🛍️ Comment commander sur la Boutique KONDU ?"
+      "🛍️ Comment commander sur la Boutique ŋdzemɔ ?"
     ]
   };
 
@@ -46,20 +46,20 @@ export const KonduAIAssistant: React.FC = () => {
     }
   }, [messages, isOpen]);
 
-  // Moteur de Réponse Intelligente Basé sur la Connaissance KONDU
+  // Moteur de Réponse Intelligente Basé sur la Connaissance ŋdzemɔ
   const generateAIResponse = (userQuery: string): { response: string; options?: string[] } => {
     const q = userQuery.toLowerCase();
 
     if (q.includes('service') || q.includes('transport') || q.includes('vtc') || q.includes('moto') || q.includes('taxi') || q.includes('tricycle') || q.includes('keke') || q.includes('déménagement')) {
       return {
-        response: "KONDU propose 5 catégories de services de mobilité au Togo 🇹🇬 :\n\n1. **Moto-Taxi (Zémidjan)** : Trajets rapides et abordables.\n2. **Taxi Confort** : Berlines climatisées pour vos déplacements urbains.\n3. **Tricycle / Kéké** : Idéal pour les petits groupes et le transport de marchandises.\n4. **Déménagement / Livraisons** : Camions et triporteurs pour gros volumes.\n5. **Transport VIP** : Véhicules premium avec chauffeurs certifiés.",
+        response: "ŋdzemɔ propose 5 catégories de services de mobilité au Togo 🇹🇬 :\n\n1. **Moto-Taxi (Zémidjan)** : Trajets rapides et abordables.\n2. **Taxi Confort** : Berlines climatisées pour vos déplacements urbains.\n3. **Tricycle / Kéké** : Idéal pour les petits groupes et le transport de marchandises.\n4. **Déménagement / Livraisons** : Camions et triporteurs pour gros volumes.\n5. **Transport VIP** : Véhicules premium avec chauffeurs certifiés.",
         options: ["👑 S'abonner au Forfait VIP", "📍 Suivi GPRS en direct", "🚗 Devenir Chauffeur"]
       };
     }
 
     if (q.includes('vip') || q.includes('15000') || q.includes('5000') || q.includes('abonnement') || q.includes('forfait') || q.includes('prix') || q.includes('tarif')) {
       return {
-        response: "👑 **Grille Officielle des Forfaits KONDU PRO Togo** 🇹🇬 :\n\n- **Pass 24H Essentiel** : 500 F CFA (Courses illimitées, 0% commission, GPS actif)\n- **Pass 24H Confort** : 1 000 F CFA (Visibilité prioritaire & alertes)\n- **Pass Hebdomadaire (7 Jours)** : 2 500 F CFA (~357 F/jour)\n- **Pass Mensuel Pro (30 Jours)** : 8 000 F CFA (~266 F/jour, support 7j/7)\n- **KONDU VIP (30 Jours)** : 15 000 F CFA (Badge VIP Doré, matching prioritaire n°1, direct clients VIP)",
+        response: "👑 **Grille Officielle des Forfaits ŋdzemɔ PRO Togo** 🇹🇬 :\n\n- **Pass 24H Essentiel** : 500 F CFA (Courses illimitées, 0% commission, GPS actif)\n- **Pass 24H Confort** : 1 000 F CFA (Visibilité prioritaire & alertes)\n- **Pass Hebdomadaire (7 Jours)** : 2 500 F CFA (~357 F/jour)\n- **Pass Mensuel Pro (30 Jours)** : 8 000 F CFA (~266 F/jour, support 7j/7)\n- **ŋdzemɔ VIP (30 Jours)** : 15 000 F CFA (Badge VIP Doré, matching prioritaire n°1, direct clients VIP)",
         options: ["🚗 S'abonner au Forfait", "📞 Contacter le Support"]
       };
     }
@@ -73,27 +73,27 @@ export const KonduAIAssistant: React.FC = () => {
 
     if (q.includes('chauffeur') || q.includes('partenaire') || q.includes('inscrire') || q.includes('commission') || q.includes('rejoindre')) {
       return {
-        response: "🚗 **Devenir Chauffeur Partenaire KONDU** :\n\n- **0% de commission** sur vos courses !\n- Activation simple avec nos forfaits souples (200 F / jour, 1 000 F / semaine, 5 000 F / mois).\n- Géolocalisation GPRS en direct avec vos plaques togolaises certifiées `TG 1234 AB`.\n- Contact WhatsApp direct avec les passagers !",
+        response: "🚗 **Devenir Chauffeur Partenaire ŋdzemɔ** :\n\n- **0% de commission** sur vos courses !\n- Activation simple avec nos forfaits souples (200 F / jour, 1 000 F / semaine, 5 000 F / mois).\n- Géolocalisation GPRS en direct avec vos plaques togolaises certifiées `TG 1234 AB`.\n- Contact WhatsApp direct avec les passagers !",
         options: ["👑 Découvrir les forfaits", "🛍️ Visiter la Boutique"]
       };
     }
 
     if (q.includes('boutique') || q.includes('produit') || q.includes('commander') || q.includes('shop')) {
       return {
-        response: "🛍️ **La Boutique KONDU** :\n\nDécouvrez nos équipements et accessoires auto/moto certifiés : casques homologués, supports GPS, kits d'entretien, pièces détachées et équipements chauffeurs. Commandez directement en ligne avec livraison rapide à Lomé et dans tout le Togo !",
+        response: "🛍️ **La Boutique ŋdzemɔ** :\n\nDécouvrez nos équipements et accessoires auto/moto certifiés : casques homologués, supports GPS, kits d'entretien, pièces détachées et équipements chauffeurs. Commandez directement en ligne avec livraison rapide à Lomé et dans tout le Togo !",
         options: ["🛍️ Aller à la Boutique", "🚕 Demander une course"]
       };
     }
 
     if (q.includes('bonjour') || q.includes('salut') || q.includes('hello') || q.includes('coucou')) {
       return {
-        response: "Bonjour ! 😊 Je suis ravi de vous aider. Dites-moi ce que vous aimeriez savoir sur les transports, le suivi GPRS ou les abonnements KONDU !",
+        response: "Bonjour ! 😊 Je suis ravi de vous aider. Dites-moi ce que vous aimeriez savoir sur les transports, le suivi GPRS ou les abonnements ŋdzemɔ !",
         options: ["🚕 Services VTC", "📍 Suivi GPRS", "👑 Forfait VIP"]
       };
     }
 
     return {
-      response: "Je comprends votre demande ! KONDU est la plateforme leader de mobilité et de services au Togo. Je peux vous renseigner sur la réservation de courses (Moto, Taxi, Tricycle, Déménagement), le suivi GPRS direct des chauffeurs, les forfaits 0% commission, ou la boutique en ligne. Que souhaitez-vous préciser ?",
+      response: "Je comprends votre demande ! ŋdzemɔ est la plateforme leader de mobilité et de services au Togo. Je peux vous renseigner sur la réservation de courses (Moto, Taxi, Tricycle, Déménagement), le suivi GPRS direct des chauffeurs, les forfaits 0% commission, ou la boutique en ligne. Que souhaitez-vous préciser ?",
       options: ["🚕 Services de transport", "📍 Suivi GPRS direct", "👑 Offre VIP (5 000 F)", "🚗 Espace Chauffeurs"]
     };
   };
@@ -155,7 +155,7 @@ export const KonduAIAssistant: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-sm font-black flex items-center gap-1.5 text-white">
-                  KONDU AI <span className="bg-amber-500/20 text-amber-300 text-[9px] px-1.5 py-0.5 rounded font-bold border border-amber-500/30">PRO</span>
+                  ŋdzemɔ AI <span className="bg-amber-500/20 text-amber-300 text-[9px] px-1.5 py-0.5 rounded font-bold border border-amber-500/30">PRO</span>
                 </h3>
                 <p className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -211,7 +211,7 @@ export const KonduAIAssistant: React.FC = () => {
             {isTyping && (
               <div className="flex items-center gap-2 bg-white p-3 rounded-2xl border border-slate-200 text-xs text-slate-500 w-fit">
                 <Bot className="w-4 h-4 text-amber-500 animate-spin" />
-                <span>KONDU AI analyse votre réponse...</span>
+                <span>ŋdzemɔ AI analyse votre réponse...</span>
               </div>
             )}
 
@@ -225,7 +225,7 @@ export const KonduAIAssistant: React.FC = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Posez votre question à KONDU AI..."
+              placeholder="Posez votre question à ŋdzemɔ AI..."
               className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition"
             />
             <button

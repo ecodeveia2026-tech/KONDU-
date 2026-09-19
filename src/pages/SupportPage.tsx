@@ -137,7 +137,7 @@ export const SupportPage: React.FC = () => {
             <div className="p-6 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-center space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
               <h4 className="font-bold text-base text-white">Ticket transmis avec succès !</h4>
-              <p className="text-xs">Un conseiller de l'équipe KONDU Togo vous répondra dans les plus brefs délais.</p>
+              <p className="text-xs">Un conseiller de l'équipe ŋdzemɔ Togo vous répondra dans les plus brefs délais.</p>
               <button
                 onClick={() => setTicketSent(false)}
                 className="mt-3 text-xs text-amber-400 underline font-bold"

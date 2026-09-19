@@ -39,7 +39,7 @@ export const BASE_SHOP_PRODUCTS: Product[] = [
   },
   {
     id: 'base-prod-2',
-    name: 'Sac Isotherme Grand Volume KONDU Express',
+    name: 'Sac Isotherme Grand Volume ŋdzemɔ Express',
     description: 'Sac de livraison étanche 45L avec bandes réfléchissantes nocturnes et isolation thermique haute densité.',
     price_cfa: 15000,
     category: 'Alimentaire',
