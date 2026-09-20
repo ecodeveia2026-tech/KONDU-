@@ -544,8 +544,9 @@ export const ClientDashboard: React.FC = () => {
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">Espace Passager</span>
+              <div className="flex items-center gap-3 mb-1">
+                <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-9 w-auto" />
+                <span className="text-[11px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-extrabold tracking-wide shadow-sm">PASSAGER</span>
                 <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
                   0% Commission
                 </span>

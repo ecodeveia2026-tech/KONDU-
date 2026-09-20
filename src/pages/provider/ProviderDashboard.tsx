@@ -407,8 +407,9 @@ export const ProviderDashboard: React.FC = () => {
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">ŋdzemɔ PRO</span>
+              <div className="flex items-center gap-3 mb-1">
+                <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-9 w-auto" />
+                <span className="text-[11px] bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-full font-extrabold tracking-wide shadow-sm">PRO</span>
                 {providerProfile?.is_vip && (
                   <span className="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5">
                     <Crown className="w-3 h-3 text-amber-600" /> VIP DORÉ

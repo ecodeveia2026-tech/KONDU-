@@ -640,11 +640,14 @@ export const AdminDashboard: React.FC = () => {
         
         {/* En-tête Sidebar */}
         <div className="px-3 py-2 flex items-center justify-between border-b border-slate-200 pb-4">
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-wider flex items-center gap-2">
-              ŋdzemɔ <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">ADMIN</span>
-            </h1>
-            <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Tableau de bord</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo-ndzemo.png" alt="ŋdzemɔ" className="h-10 w-auto" />
+            <div>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-[11px] bg-amber-500 text-slate-950 px-2.5 py-0.5 rounded-full font-extrabold tracking-wide shadow-sm">ADMIN</span>
+              </span>
+              <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Tableau de bord</p>
+            </div>
           </div>
           <button onClick={() => setMobileSidebarOpen(false)} className="md:hidden p-1 text-slate-500 hover:text-slate-900">
             <X className="w-5 h-5" />
