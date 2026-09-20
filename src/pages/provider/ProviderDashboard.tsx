@@ -340,26 +340,35 @@ export const ProviderDashboard: React.FC = () => {
     }
   };
 
-  // Souscription ou activation de forfait d'abonnement
+  // Souscription ou activation de forfait d'abonnement via PayDunya
   const handleSubscribePlan = async (plan: SubscriptionPlan) => {
     if (!user) return;
     setIsActivatingPlan(plan.id);
 
     try {
-      const paymentRef = 'PAY-TG-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-      const res = await paymentService.activateSubscriptionDirectly(user.id, plan, paymentRef);
+      const res = await paymentService.initiateSubscriptionPayment(user.id, plan);
 
-      if (res.success) {
-        await refreshProfile();
-        setShowSubscriptionModal(false);
-        confetti({ particleCount: 80, spread: 70 });
-        alert(`Votre forfait "${plan.name}" (${plan.price_cfa} F CFA) est désormais actif pour ${plan.duration_days} jours !`);
-      } else {
-        alert('Erreur lors de l\'activation: ' + (res.error || 'Veuillez réessayer.'));
+      if (res.success && res.paymentUrl) {
+        // Rediriger vers PayDunya pour le paiement réel
+        window.location.href = res.paymentUrl;
+        return;
       }
+
+      if (res.requiresExternalConfig) {
+        // PayDunya pas encore configuré — informer clairement sans simuler
+        alert(
+          '⚠️ Le système de paiement en ligne n\'est pas encore configuré.\n\n' +
+          'Pour activer votre forfait, contactez l\'administration ŋdzemɔ :\n' +
+          '📞 +228 93919212 / +228 99255231'
+        );
+        return;
+      }
+
+      alert('Erreur : ' + (res.message || 'Paiement impossible. Veuillez réessayer.'));
+
     } catch (err: any) {
       console.error('Erreur activation abonnement:', err);
-      alert('Erreur: ' + err.message);
+      alert('Service de paiement temporairement indisponible. Veuillez réessayer plus tard.');
     } finally {
       setIsActivatingPlan(null);
     }

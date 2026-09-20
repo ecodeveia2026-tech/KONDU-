@@ -12,6 +12,7 @@ import { BusinessDashboard } from './pages/business/BusinessDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { SupportPage } from './pages/SupportPage';
 import { ShopPage } from './pages/ShopPage';
+import { PaymentCallback } from './pages/PaymentCallback';
 
 export function App() {
   return (
@@ -85,7 +86,10 @@ export function App() {
           {/* 8. Boutique Publique */}
           <Route path="/shop" element={<ShopPage />} />
 
-          {/* 8. Redirection par défaut vers l'accueil */}
+          {/* 9. Page de retour paiement PayDunya */}
+          <Route path="/payment/callback" element={<PaymentCallback />} />
+
+          {/* 10. Redirection par défaut vers l'accueil */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

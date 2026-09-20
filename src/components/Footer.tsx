@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Compass, ShieldCheck, Heart, Car, Building2, Crown, Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
+import { ShieldCheck, Heart, Car, Building2, Crown, Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (

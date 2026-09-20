@@ -1,7 +1,7 @@
 // ==============================================================================
 // ŋdzemɔ - SERVICE OFFICIEL DE GESTION DES PAIEMENTS & ABONNEMENTS
-// Conforme aux règles ŋdzemɔ : AUCUNE SIMULATION de paiement fictif
-// Les paiements doivent être validés côté serveur / webhook
+// Architecture sécurisée : frontend → backend Vercel → PayDunya
+// Les clés secrètes PayDunya restent EXCLUSIVEMENT côté serveur
 // ==============================================================================
 
 import { supabase } from '../supabase';
@@ -15,81 +15,122 @@ export interface PaymentInitiationResult {
   transactionReference?: string;
 }
 
+export interface TransactionStatus {
+  reference: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+  amount: number;
+  currency: string;
+  planName?: string;
+  planId?: string;
+  isVip?: boolean;
+  completedAt?: string;
+  failedAt?: string;
+}
+
 class PaymentService {
   /**
-   * Vérifie si une passerelle de paiement en ligne (T-Money / Moov Money / FedaPay) est configurée
+   * Vérifie si le backend PayDunya est accessible (Vercel Serverless)
+   * Ne vérifie PAS les clés côté client — elles sont exclusivement serveur
    */
   public isPaymentGatewayConfigured(): boolean {
-    const gatewayKey = import.meta.env.VITE_PAYMENT_PUBLIC_KEY || '';
-    return Boolean(gatewayKey && gatewayKey.length > 5);
+    // La configuration est toujours considérée comme possible via le backend
+    // On laisse le serveur signaler si les clés sont absentes
+    return true;
   }
 
   /**
-   * Initialise une transaction de paiement réelle pour un abonnement chauffeur ou VIP
+   * Initialise une transaction de paiement via le backend sécurisé Vercel
+   * Le frontend n'a JAMAIS accès aux clés PayDunya
    */
   public async initiateSubscriptionPayment(
-    userId: string,
+    _userId: string,
     plan: SubscriptionPlan,
-    phoneNumber?: string,
-    operator?: 'TMONEY' | 'MOOV_MONEY' | 'CARD'
+    _phoneNumber?: string,
+    _operator?: string
   ): Promise<PaymentInitiationResult> {
-    const isConfigured = this.isPaymentGatewayConfigured();
-
-    // RÈGLE STRICTE ŋdzemɔ : Si l'API de paiement n'est pas configurée, NE JAMAIS SIMULER DE FAUX PAIEMENT !
-    if (!isConfigured) {
-      return {
-        success: false,
-        requiresExternalConfig: true,
-        message:
-          'L\'intégration directe Mobile Money (T-Money / Moov Money Togo) nécessite la configuration des clés d\'API marchandes. Veuillez contacter l\'administration ŋdzemɔ ou régler directement via le support officiel (+228 93919212 / +228 99255231).',
-      };
-    }
-
     try {
-      const transactionRef = `TX-ŋdzemɔ-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-
-      // Enregistrement de la transaction en statut PENDING dans la table payment_transactions
-      const { error: txError } = await supabase.from('payment_transactions').insert({
-        user_id: userId,
-        amount: plan.price_cfa,
-        currency: 'XOF',
-        provider: operator || 'TMONEY',
-        transaction_reference: transactionRef,
-        status: 'PENDING',
-        payment_method: operator || 'MOBILE_MONEY',
-        metadata: {
-          plan_id: plan.id,
-          plan_name: plan.name,
-          phone_number: phoneNumber,
-          duration_days: plan.duration_days,
-          is_vip: plan.is_vip,
-        },
-      });
-
-      if (txError) {
-        console.error('[PaymentService] Erreur création transaction:', txError.message);
+      // Récupérer le JWT de l'utilisateur connecté
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
         return {
           success: false,
-          message: 'Erreur lors de l\'enregistrement de la transaction.',
+          message: 'Session expirée. Veuillez vous reconnecter.',
+        };
+      }
+
+      const siteBaseUrl = window.location.origin;
+      const returnUrl = `${siteBaseUrl}/payment/callback?status=success&ref=PENDING`;
+      const cancelUrl = `${siteBaseUrl}/payment/callback?status=cancelled&ref=PENDING`;
+
+      // Appel au backend sécurisé (Vercel Serverless Function)
+      const response = await fetch('/api/paydunya/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: plan.id,
+          authToken: session.access_token,
+          returnUrl,
+          cancelUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        // Si le backend indique que PayDunya n'est pas configuré
+        if (response.status === 503) {
+          return {
+            success: false,
+            requiresExternalConfig: true,
+            message: data.error || 'Le service de paiement nécessite une configuration. Contactez l\'administration ŋdzemɔ.',
+          };
+        }
+        return {
+          success: false,
+          message: data.error || 'Erreur lors de la création du paiement.',
         };
       }
 
       return {
         success: true,
-        transactionReference: transactionRef,
-        message: 'Transaction initiée. En attente de confirmation par le fournisseur de paiement.',
+        paymentUrl: data.paymentUrl,
+        transactionReference: data.transactionReference,
+        message: 'Paiement initié. Redirection vers PayDunya en cours...',
       };
+
     } catch (err: any) {
-      console.error('[PaymentService] Exception initiateSubscriptionPayment:', err);
+      console.error('[PaymentService] Exception initiateSubscriptionPayment:', err.message);
       return {
         success: false,
-        message: err.message || 'Erreur inattendue lors de l\'initiation du paiement.',
+        message: 'Service de paiement temporairement indisponible.',
       };
     }
   }
 
   /**
+   * Vérifie le statut d'une transaction via le backend sécurisé
+   */
+  public async checkTransactionStatus(transactionRef: string): Promise<TransactionStatus | null> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return null;
+
+      const response = await fetch(
+        `/api/paydunya/check-status?ref=${encodeURIComponent(transactionRef)}&authToken=${encodeURIComponent(session.access_token)}`
+      );
+
+      if (!response.ok) return null;
+      return await response.json() as TransactionStatus;
+
+    } catch (err: any) {
+      console.error('[PaymentService] checkTransactionStatus:', err.message);
+      return null;
+    }
+  }
+
+  /**
    * Activation administrative ou manuelle d'un abonnement après confirmation de paiement réel
+   * Utilisé uniquement par les admins ou après vérification côté serveur
    */
   public async activateSubscriptionDirectly(
     userId: string,

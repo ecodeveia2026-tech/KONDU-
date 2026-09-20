@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Compass, MapPin, ArrowRight, Star, Shield,
-  CheckCircle2, Car, ChevronDown, Download, Clock, Zap,
+  MapPin, ArrowRight, Star, Shield,
+  CheckCircle2, Car, ChevronDown, Download, Clock,
   Phone, Mail, MessageSquare, ShieldCheck,
   LogIn, LogOut, Menu, X, LayoutDashboard, Smartphone
 } from 'lucide-react';
@@ -369,7 +369,7 @@ const Navbar: React.FC<{ onOpenDownload: () => void }> = ({ onOpenDownload }) =>
 export const LandingPage: React.FC = () => {
   const { user, role } = useAuth();
   const [counters, setCounters] = useState({ chauffeurs: 0, courses: 0, villes: 0 });
-  const [dynamicPhraseIndex, setDynamicPhraseIndex] = useState(0);
+  const [_dynamicPhraseIndex, setDynamicPhraseIndex] = useState(0);
 
   // États pour le formulaire de contact rapide
   const [contactName, setContactName] = useState('');
