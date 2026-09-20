@@ -520,29 +520,22 @@ textarea {
   transform-origin: center bottom;
 }
 
-/* Texte "déplacez-vous" — grand, animé, avec soulignement tricolore */
-.hero-line-deplace {
-  display: inline-block;
-  font-size: clamp(36px, 5vw, 72px);
+/* Texte typewriter hero — Style Gozem */
+.typewriter-hero {
+  margin: 0;
+  padding: 0;
+  font-size: clamp(38px, 5.5vw, 76px);
   font-weight: 900;
+  line-height: 1.08;
   letter-spacing: -2px;
   color: #0f172a;
-  position: relative;
-  animation: heroLineIn 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) 0.4s both;
-  padding-bottom: 6px;
+  text-decoration: none;
+  -webkit-text-decoration: none;
 }
 
-/* Soulignement tricolore sous "déplacez-vous" */
-.hero-line-deplace::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 5px;
-  border-radius: 999px;
-  background: linear-gradient(to right, #0ea5e9 0%, #22c55e 40%, #f59e0b 70%, #ef4444 100%);
-  animation: underlineGrow 0.8s ease-out 1.1s both;
-  width: 0;
+/* Aucun soulignement sur quoi que ce soit dans le hero */
+.typewriter-hero span {
+  text-decoration: none !important;
 }
 
 /* Responsive mobile */
@@ -550,8 +543,8 @@ textarea {
   .ndzemo-hero-img {
     height: clamp(70px, 30vw, 120px);
   }
-  .hero-line-deplace {
-    font-size: clamp(28px, 8vw, 48px);
+  .typewriter-hero {
+    font-size: clamp(28px, 9vw, 48px);
     letter-spacing: -1px;
   }
 }

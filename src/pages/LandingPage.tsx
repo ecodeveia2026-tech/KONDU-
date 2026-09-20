@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Compass, MapPin, ArrowRight, Star, Shield,
@@ -9,6 +9,85 @@ import {
 import { KonduAIAssistant } from '../components/KonduAIAssistant';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardRouteForRole } from '../components/AuthGuard';
+
+/* ─── TYPEWRITER HERO — Style Gozem ──────────────────────────────────────── */
+const TYPEWRITER_LINES = [
+  'ŋdzemɔ, votre super\napp tout-en-un pour\nvos déplacements',
+  'Déplacez-vous\nsans attendre ⚡',
+  'Transport, livraison\net bien plus encore 🚗',
+  'Zéro commission.\nMaximum liberté 💎',
+];
+
+const TypewriterHero: React.FC = () => {
+  const [displayText, setDisplayText] = useState('');
+  const [lineIndex, setLineIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clignotement du curseur
+  useEffect(() => {
+    const cursorTimer = setInterval(() => setShowCursor(c => !c), 500);
+    return () => clearInterval(cursorTimer);
+  }, []);
+
+  // Machine à écrire
+  useEffect(() => {
+    const currentLine = TYPEWRITER_LINES[lineIndex];
+
+    if (!isDeleting) {
+      if (charIndex < currentLine.length) {
+        timeoutRef.current = setTimeout(() => {
+          setDisplayText(currentLine.slice(0, charIndex + 1));
+          setCharIndex(i => i + 1);
+        }, 55);
+      } else {
+        // Pause avant effacement
+        timeoutRef.current = setTimeout(() => setIsDeleting(true), 2200);
+      }
+    } else {
+      if (charIndex > 0) {
+        timeoutRef.current = setTimeout(() => {
+          setDisplayText(currentLine.slice(0, charIndex - 1));
+          setCharIndex(i => i - 1);
+        }, 28);
+      } else {
+        setIsDeleting(false);
+        setLineIndex(i => (i + 1) % TYPEWRITER_LINES.length);
+      }
+    }
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, [charIndex, isDeleting, lineIndex]);
+
+  // Convertir les \n en <br>
+  const parts = displayText.split('\n');
+
+  return (
+    <span style={{ display: 'block' }}>
+      {parts.map((part, i) => (
+        <span key={i} style={{ display: 'block' }}>
+          {part}
+          {i === parts.length - 1 && (
+            <span
+              style={{
+                display: 'inline-block',
+                width: 4,
+                height: '0.85em',
+                background: '#0ea5e9',
+                marginLeft: 4,
+                verticalAlign: 'middle',
+                borderRadius: 2,
+                opacity: showCursor ? 1 : 0,
+                transition: 'opacity 0.1s',
+              }}
+            />
+          )}
+        </span>
+      ))}
+    </span>
+  );
+};
 
 /* ─── ICÔNE OFFICIELLE WHATSAPP SVG (Logo officiel vert avec bulle & téléphone blanc) ─── */
 export const OfficialWhatsAppBadge: React.FC<{ size?: number }> = ({ size = 28 }) => (
@@ -380,10 +459,10 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
 
-            {/* ── TITRE HERO : Logo ŋdzemɔ Grand + Animation Professionnelle ── */}
+            {/* ── TITRE HERO : Style Gozem — Typewriter effect ── */}
             <div style={{ marginBottom: 28 }}>
 
-              {/* Logo image en grand — animation d'entrée */}
+              {/* Logo en grand */}
               <div className="ndzemo-logo-hero">
                 <img
                   src="/logo-ndzemo.png"
@@ -392,17 +471,9 @@ export const LandingPage: React.FC = () => {
                 />
               </div>
 
-              {/* Ligne animée : déplacez-vous */}
-              <h1 style={{ margin: 0, padding: 0, lineHeight: 1.05 }}>
-                <span className="hero-line-deplace">
-                  déplacez-vous
-                </span>
-                <br />
-                {/* Phrase dynamique avec animation slide */}
-                <span key={dynamicPhraseIndex} className="sans-attendre-animated phrase-motion-in inline-flex items-center gap-3" style={{ fontSize: 'clamp(30px, 4vw, 56px)' }}>
-                  {dynamicPhrases[dynamicPhraseIndex]}
-                  <span className="radar-dot ml-1 align-middle" />
-                </span>
+              {/* Texte typewriter style Gozem */}
+              <h1 className="typewriter-hero">
+                <TypewriterHero />
               </h1>
             </div>
 
