@@ -380,31 +380,31 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Titre principal — Animation Motion Design Professionnelle WOW */}
-            <h1 style={{
-              fontSize: 'clamp(44px, 5.8vw, 78px)',
-              fontWeight: 900,
-              lineHeight: 1.08,
-              letterSpacing: '-2.5px',
-              marginBottom: 24,
-              position: 'relative'
-            }}>
-              <span className="kondu-gradient-title inline-flex items-center gap-3">
-                ŋdzemɔ,
-                <span className="relative inline-flex items-center justify-center">
-                  <Zap className="w-10 h-10 text-amber-500 speed-icon-animated inline-block" />
+            {/* ── TITRE HERO : Logo ŋdzemɔ Grand + Animation Professionnelle ── */}
+            <div style={{ marginBottom: 28 }}>
+
+              {/* Logo image en grand — animation d'entrée */}
+              <div className="ndzemo-logo-hero">
+                <img
+                  src="/logo-ndzemo.png"
+                  alt="ŋdzemɔ"
+                  className="ndzemo-hero-img"
+                />
+              </div>
+
+              {/* Ligne animée : déplacez-vous */}
+              <h1 style={{ margin: 0, padding: 0, lineHeight: 1.05 }}>
+                <span className="hero-line-deplace">
+                  déplacez-vous
                 </span>
-              </span>
-              <br />
-              <span className="deplacez-animated-text">
-                déplacez-vous
-              </span>
-              <br />
-              <span key={dynamicPhraseIndex} className="sans-attendre-animated phrase-motion-in inline-flex items-center gap-3">
-                {dynamicPhrases[dynamicPhraseIndex]}
-                <span className="radar-dot ml-1 align-middle" />
-              </span>
-            </h1>
+                <br />
+                {/* Phrase dynamique avec animation slide */}
+                <span key={dynamicPhraseIndex} className="sans-attendre-animated phrase-motion-in inline-flex items-center gap-3" style={{ fontSize: 'clamp(30px, 4vw, 56px)' }}>
+                  {dynamicPhrases[dynamicPhraseIndex]}
+                  <span className="radar-dot ml-1 align-middle" />
+                </span>
+              </h1>
+            </div>
 
             {/* Sous-titre */}
             <p style={{

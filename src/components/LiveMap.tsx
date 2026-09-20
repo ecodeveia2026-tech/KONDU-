@@ -161,9 +161,15 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   const [tileStyle, setTileStyle] = useState<'voyager' | 'standard' | 'dark'>('voyager');
 
   const tileUrls = {
-    voyager: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    voyager: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    standard: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    dark: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+  };
+
+  const tileAttrib = {
+    voyager: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    standard: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    dark: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://hot.openstreetmap.org/">HOT</a>',
   };
 
   const handleSelectLocality = (loc: LocalityPoint) => {
@@ -233,8 +239,9 @@ export const LiveMap: React.FC<LiveMapProps> = ({
           className="w-full h-full"
         >
           <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+            attribution={tileAttrib[tileStyle]}
             url={tileUrls[tileStyle]}
+            maxZoom={19}
           />
 
           <RecenterMap center={mapCenter} zoom={mapZoom} />
@@ -289,13 +296,26 @@ export const LiveMap: React.FC<LiveMapProps> = ({
             </Marker>
           )}
 
-          {/* Tracé dynamique de la course */}
-          {pickupCoords && dropoffCoords && (
+          {/* Tracé GPS : si un chauffeur est sélectionné → vers le client (pickup)
+               Sinon tracé context pickup → dropoff en pointillés */}
+          {providers.length > 0 && pickupCoords && providers[0]?.current_lat && providers[0]?.current_lng && (
+            <Polyline
+              positions={[
+                [providers[0].current_lat, providers[0].current_lng],
+                pickupCoords,
+              ]}
+              color="#f59e0b"
+              weight={5}
+              opacity={0.9}
+            />
+          )}
+          {(!providers.length || !providers[0]?.current_lat) && pickupCoords && dropoffCoords && (
             <Polyline
               positions={[pickupCoords, dropoffCoords]}
-              color="#f59e0b"
-              weight={4.5}
+              color="#94a3b8"
+              weight={3}
               dashArray="6, 8"
+              opacity={0.7}
             />
           )}
 
