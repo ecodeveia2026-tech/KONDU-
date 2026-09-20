@@ -44,7 +44,9 @@ import {
   Filter,
   Eye,
   TrendingUp,
-  Monitor
+  Monitor,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 
 export interface Incident {
@@ -109,6 +111,7 @@ export const AdminDashboard: React.FC = () => {
   const [prodImagePreview, setProdImagePreview] = useState<string | null>(null);
   const [isSubmittingProd, setIsSubmittingProd] = useState(false);
   const [prodFormError, setProdFormError] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   // Synchronisation des forfaits d'abonnement
   const [isSyncingPlans, setIsSyncingPlans] = useState(false);
@@ -142,7 +145,65 @@ export const AdminDashboard: React.FC = () => {
     setProdImagePreview(null);
     setProdFormError(null);
     setIsSubmittingProd(false);
+    setEditingProductId(null);
     setShowAddProductModal(false);
+  };
+
+  const handleEditProduct = (prod: any) => {
+    setEditingProductId(prod.id);
+    setProdName(prod.name || '');
+    setProdPrice(String(prod.price_cfa || ''));
+    setProdDescription(prod.description || '');
+    setProdCategory(prod.category || 'Général');
+    setProdStock(String(prod.stock_quantity ?? 100));
+    setProdImagePreview(prod.image_url || null);
+    setProdImageFile(null);
+    setProdFormError(null);
+    setShowAddProductModal(true);
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProductId) return;
+    if (!prodName.trim()) {
+      setProdFormError('Le nom du produit est obligatoire.');
+      return;
+    }
+    const priceNum = parseFloat(prodPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setProdFormError('Le prix doit être un nombre supérieur à 0.');
+      return;
+    }
+
+    setIsSubmittingProd(true);
+    setProdFormError(null);
+
+    try {
+      const result = await shopService.updateProduct(editingProductId, {
+        name: prodName,
+        description: prodDescription,
+        price_cfa: priceNum,
+        category: prodCategory,
+        stock_quantity: parseInt(prodStock) || 100,
+        imageFile: prodImageFile,
+      });
+
+      if (!result.success) {
+        setProdFormError(result.error || 'Erreur lors de la modification.');
+        setIsSubmittingProd(false);
+        return;
+      }
+
+      // Mise à jour locale
+      setShopProducts((prev) =>
+        prev.map((p) => p.id === editingProductId ? { ...p, ...result.product } : p)
+      );
+      handleResetProdForm();
+      alert(`✅ Produit « ${prodName} » modifié avec succès !`);
+    } catch (err: any) {
+      setProdFormError(err.message || 'Erreur inattendue.');
+      setIsSubmittingProd(false);
+    }
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -1214,11 +1275,18 @@ export const AdminDashboard: React.FC = () => {
                               {prod.is_active ? 'Désactiver' : 'Activer'}
                             </button>
                             <button
+                              onClick={() => handleEditProduct(prod)}
+                              className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-xl transition"
+                              title="Modifier le produit"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => handleDeleteProduct(prod.id)}
                               className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition"
                               title="Supprimer le produit"
                             >
-                              <X className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -1793,14 +1861,14 @@ export const AdminDashboard: React.FC = () => {
         </main>
       </div>
 
-      {/* Modal Création Produit */}
+      {/* Modal Création / Modification Produit */}
       {showAddProductModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative text-slate-900">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-amber-600" />
-                Ajouter un nouveau produit en ligne
+                {editingProductId ? <Pencil className="w-5 h-5 text-blue-600" /> : <ShoppingBag className="w-5 h-5 text-amber-600" />}
+                {editingProductId ? 'Modifier le produit' : 'Ajouter un nouveau produit en ligne'}
               </h3>
               <button 
                 onClick={handleResetProdForm}
@@ -1817,7 +1885,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
+            <form onSubmit={editingProductId ? handleUpdateProduct : handleCreateProduct} className="space-y-4 text-xs">
               {/* Nom du produit */}
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Nom du Produit *</label>
@@ -1937,12 +2005,12 @@ export const AdminDashboard: React.FC = () => {
                   {isSubmittingProd ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Création en cours...
+                      {editingProductId ? 'Modification...' : 'Création en cours...'}
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4" />
-                      Créer le Produit
+                      {editingProductId ? <Pencil className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      {editingProductId ? 'Enregistrer les modifications' : 'Créer le Produit'}
                     </>
                   )}
                 </button>

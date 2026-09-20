@@ -266,6 +266,73 @@ class ShopService {
 
     return true;
   }
+
+  /**
+   * Mettre à jour un produit existant
+   */
+  async updateProduct(productId: string, updates: Partial<CreateProductInput>): Promise<{ success: boolean; product?: Product; error?: string }> {
+    try {
+      let imageUrl: string | undefined;
+
+      // Upload nouvelle image si fournie
+      if (updates.imageFile) {
+        const filePath = `shop/${productId}_${Date.now()}.${updates.imageFile.name.split('.').pop()}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('shop-images')
+          .upload(filePath, updates.imageFile, { upsert: true });
+
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from('shop-images').getPublicUrl(filePath);
+          imageUrl = urlData?.publicUrl;
+        }
+      }
+
+      const updateData: any = {};
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.price_cfa !== undefined) updateData.price_cfa = updates.price_cfa;
+      if (updates.category !== undefined) updateData.category = updates.category;
+      if (updates.stock_quantity !== undefined) updateData.stock_quantity = updates.stock_quantity;
+      if (imageUrl) updateData.image_url = imageUrl;
+
+      // Mise à jour Supabase
+      const { data, error } = await supabase
+        .from('shop_products')
+        .update(updateData)
+        .eq('id', productId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Mise à jour localStorage
+      try {
+        const current = this.getLocalProducts();
+        const updated = current.map(p => p.id === productId ? { ...p, ...updateData } : p);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+
+      return { success: true, product: data as Product };
+    } catch (err: any) {
+      // Fallback localStorage si Supabase échoue
+      try {
+        const current = this.getLocalProducts();
+        const updateData: any = {};
+        if (updates.name !== undefined) updateData.name = updates.name;
+        if (updates.description !== undefined) updateData.description = updates.description;
+        if (updates.price_cfa !== undefined) updateData.price_cfa = updates.price_cfa;
+        if (updates.category !== undefined) updateData.category = updates.category;
+        if (updates.stock_quantity !== undefined) updateData.stock_quantity = updates.stock_quantity;
+
+        const updated = current.map(p => p.id === productId ? { ...p, ...updateData } : p);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+        const updatedProd = updated.find(p => p.id === productId);
+        if (updatedProd) return { success: true, product: updatedProd };
+      } catch {}
+
+      return { success: false, error: err.message || 'Erreur mise à jour produit.' };
+    }
+  }
 }
 
 export const shopService = new ShopService();
